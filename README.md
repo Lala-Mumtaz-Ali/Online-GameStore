@@ -7,7 +7,7 @@ This is a **full-stack** project, which means it includes both:
 - The **frontend** — everything you see and click on in the browser (pages, buttons, forms).
 - The **backend** — everything that happens behind the scenes (saving data to a database, checking passwords, sending emails).
 
-**Live demo:** deployed on Vercel · **Repo:** https://github.com/Lala-Mumtaz-Ali/Online-GameStore
+**Live demo:** https://gamestore007.me · **Repo:** https://github.com/Lala-Mumtaz-Ali/Online-GameStore
 
 ---
 
