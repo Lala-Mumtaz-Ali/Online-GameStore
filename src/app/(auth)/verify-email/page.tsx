@@ -13,7 +13,8 @@ export default async function VerifyEmailPage({
       <div className="rounded-xl border p-6 text-center">
         <h1 className="mb-2 text-2xl font-bold">Missing verification token</h1>
         <p className="text-muted-foreground">
-          This link is missing its verification token. Please use the link from your email.
+          This link is missing its verification token. Please use the link from your
+          email.
         </p>
       </div>
     );

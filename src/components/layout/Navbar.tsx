@@ -2,7 +2,10 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { getCartCount } from "@/data/cart";
-import { getUserNotifications, getUnreadNotificationCount } from "@/data/notificationCenter";
+import {
+  getUserNotifications,
+  getUnreadNotificationCount,
+} from "@/data/notificationCenter";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 
 export async function Navbar() {
@@ -22,37 +25,22 @@ export async function Navbar() {
           <Link href="/games" className="text-sm font-medium hover:underline">
             Games
           </Link>
-          <Link
-            href="/categories"
-            className="text-sm font-medium hover:underline"
-          >
+          <Link href="/categories" className="text-sm font-medium hover:underline">
             Categories
           </Link>
           {session?.user ? (
             <>
-              <Link
-                href="/library"
-                className="text-sm font-medium hover:underline"
-              >
+              <Link href="/library" className="text-sm font-medium hover:underline">
                 Library
               </Link>
-              <Link
-                href="/orders"
-                className="text-sm font-medium hover:underline"
-              >
+              <Link href="/orders" className="text-sm font-medium hover:underline">
                 Orders
               </Link>
-              <Link
-                href="/cart"
-                className="text-sm font-medium hover:underline"
-              >
+              <Link href="/cart" className="text-sm font-medium hover:underline">
                 Cart{cartCount > 0 ? ` (${cartCount})` : ""}
               </Link>
               {session.user.role === "ADMIN" && (
-                <Link
-                  href="/admin"
-                  className="text-sm font-medium hover:underline"
-                >
+                <Link href="/admin" className="text-sm font-medium hover:underline">
                   Admin
                 </Link>
               )}

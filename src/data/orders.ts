@@ -18,10 +18,7 @@ export async function createOrderFromCart() {
     throw new Error("Your cart is empty.");
   }
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.game.price * item.quantity,
-    0
-  );
+  const total = cartItems.reduce((sum, item) => sum + item.game.price * item.quantity, 0);
 
   const order = await prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
@@ -178,9 +175,7 @@ export async function getTopSellingGames(limit = 12) {
     take: limit,
   });
 
-  const gameIds = grouped
-    .map((g) => g.gameId)
-    .filter((id): id is string => id !== null);
+  const gameIds = grouped.map((g) => g.gameId).filter((id): id is string => id !== null);
 
   if (gameIds.length === 0) {
     return [];
@@ -192,9 +187,7 @@ export async function getTopSellingGames(limit = 12) {
   return grouped
     .map((g) => {
       const game = g.gameId ? gameById.get(g.gameId) : undefined;
-      return game
-        ? { ...game, unitsSold: g._sum.quantity ?? 0 }
-        : null;
+      return game ? { ...game, unitsSold: g._sum.quantity ?? 0 } : null;
     })
     .filter((g): g is NonNullable<typeof g> => g !== null);
 }

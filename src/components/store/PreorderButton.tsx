@@ -30,7 +30,11 @@ export function PreorderButton({
     lastHandled.current = state.timestamp;
 
     if (state.error) {
-      toastManager.add({ title: "Couldn't update preorder", description: state.error, type: "error" });
+      toastManager.add({
+        title: "Couldn't update preorder",
+        description: state.error,
+        type: "error",
+      });
     } else if (state.active) {
       toastManager.add({
         title: "Preorder placed",
@@ -46,7 +50,11 @@ export function PreorderButton({
 
   return (
     <form action={formAction}>
-      <Button type="submit" variant={state.active ? "outline" : "default"} disabled={isPending}>
+      <Button
+        type="submit"
+        variant={state.active ? "outline" : "default"}
+        disabled={isPending}
+      >
         {isPending ? "..." : state.active ? "Cancel Preorder" : "Preorder"}
       </Button>
     </form>

@@ -24,8 +24,8 @@ export default async function OrderDetailPage({
     <div className="mx-auto max-w-lg">
       <h1 className="mb-1 text-3xl font-bold">Order Confirmed</h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Order #{order.id.slice(-8)} · placed{" "}
-        {order.createdAt.toLocaleDateString()} · status: {order.status}
+        Order #{order.id.slice(-8)} · placed {order.createdAt.toLocaleDateString()} ·
+        status: {order.status}
       </p>
 
       <div className="rounded-xl border p-4">

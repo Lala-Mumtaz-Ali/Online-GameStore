@@ -47,9 +47,7 @@ export default async function AdminGamesPage({
                 <td className="p-3">{game.title}</td>
                 <td className="p-3 text-muted-foreground">{game.slug}</td>
                 <td className="p-3">${game.price.toFixed(2)}</td>
-                <td className="p-3">
-                  {game.releaseDate.toLocaleDateString()}
-                </td>
+                <td className="p-3">{game.releaseDate.toLocaleDateString()}</td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
                     <Button

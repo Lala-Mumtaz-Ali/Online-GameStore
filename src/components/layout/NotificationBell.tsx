@@ -30,9 +30,7 @@ export function NotificationBell({
   const [, startTransition] = useTransition();
 
   function markOneRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     setUnreadCount((count) => Math.max(0, count - 1));
     startTransition(async () => {
       await markNotificationReadAction(id);
@@ -89,9 +87,7 @@ export function NotificationBell({
                   const body = (
                     <>
                       <p className="font-medium">{notification.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {notification.body}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{notification.body}</p>
                     </>
                   );
                   const className = `block rounded-lg p-2 text-left text-sm ${

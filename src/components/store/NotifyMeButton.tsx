@@ -30,7 +30,11 @@ export function NotifyMeButton({
     lastHandled.current = state.timestamp;
 
     if (state.error) {
-      toastManager.add({ title: "Couldn't update notification", description: state.error, type: "error" });
+      toastManager.add({
+        title: "Couldn't update notification",
+        description: state.error,
+        type: "error",
+      });
     } else if (state.active) {
       toastManager.add({
         title: "You're on the list",

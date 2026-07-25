@@ -8,10 +8,7 @@ const inputClassName =
   "rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
 
 type CategoryFormProps = {
-  action: (
-    state: CategoryFormState,
-    formData: FormData
-  ) => Promise<CategoryFormState>;
+  action: (state: CategoryFormState, formData: FormData) => Promise<CategoryFormState>;
   defaultValues?: {
     name: string;
     slug: string;
@@ -19,11 +16,7 @@ type CategoryFormProps = {
   submitLabel: string;
 };
 
-export function CategoryForm({
-  action,
-  defaultValues,
-  submitLabel,
-}: CategoryFormProps) {
+export function CategoryForm({ action, defaultValues, submitLabel }: CategoryFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
 
   return (

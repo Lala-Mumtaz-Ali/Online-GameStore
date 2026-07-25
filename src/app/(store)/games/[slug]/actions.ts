@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  createPreorder,
-  cancelPreorder,
-} from "@/data/preorders";
+import { createPreorder, cancelPreorder } from "@/data/preorders";
 import {
   requestReleaseNotification,
   cancelReleaseNotification,

@@ -8,13 +8,7 @@ type GameCardProps = {
   owned?: boolean;
 };
 
-export function GameCard({
-  slug,
-  title,
-  price,
-  imageUrl,
-  owned = false,
-}: GameCardProps) {
+export function GameCard({ slug, title, price, imageUrl, owned = false }: GameCardProps) {
   return (
     <Link
       href={`/games/${slug}`}

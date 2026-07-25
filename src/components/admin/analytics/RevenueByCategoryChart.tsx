@@ -66,7 +66,10 @@ export function RevenueByCategoryChart({
           />
           <Bar dataKey="revenue" name="Revenue" radius={[4, 4, 0, 0]} maxBarSize={64}>
             {data.map((entry) => (
-              <Cell key={entry.name} fill={CHART_COLORS[entry.colorIndex % CHART_COLORS.length]} />
+              <Cell
+                key={entry.name}
+                fill={CHART_COLORS[entry.colorIndex % CHART_COLORS.length]}
+              />
             ))}
             <LabelList
               dataKey="revenue"

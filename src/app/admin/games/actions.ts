@@ -3,18 +3,16 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {
-  createGame,
-  updateGame,
-  deleteGame,
-  type GameInput,
-} from "@/data/games";
+import { createGame, updateGame, deleteGame, type GameInput } from "@/data/games";
 
 const gameSchema = z.object({
   slug: z
     .string()
     .min(1, "Slug is required")
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only"),
+    .regex(
+      /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      "Use lowercase letters, numbers, and hyphens only"
+    ),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   price: z.coerce.number().positive("Price must be greater than 0"),

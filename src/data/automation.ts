@@ -76,7 +76,9 @@ export async function runReleaseDayProcessing() {
     where: { releaseDate: { lte: now }, releaseAutomationRanAt: null },
     include: {
       preorders: { include: { user: { select: { id: true, email: true, name: true } } } },
-      notifyRequests: { include: { user: { select: { id: true, email: true, name: true } } } },
+      notifyRequests: {
+        include: { user: { select: { id: true, email: true, name: true } } },
+      },
     },
   });
 
@@ -179,7 +181,10 @@ export async function runWeeklyAdminReport() {
       include: { items: true },
     }),
     prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
-    prisma.user.findMany({ where: { role: "ADMIN" }, select: { id: true, email: true, name: true } }),
+    prisma.user.findMany({
+      where: { role: "ADMIN" },
+      select: { id: true, email: true, name: true },
+    }),
   ]);
 
   const revenue = orders.reduce((sum, order) => sum + order.total, 0);
@@ -225,5 +230,11 @@ export async function runWeeklyAdminReport() {
     });
   }
 
-  return { adminsEmailed, newOrders: orders.length, revenue, newUsers: newUsersCount, topGame };
+  return {
+    adminsEmailed,
+    newOrders: orders.length,
+    revenue,
+    newUsers: newUsersCount,
+    topGame,
+  };
 }

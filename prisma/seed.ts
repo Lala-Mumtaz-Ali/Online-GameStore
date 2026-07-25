@@ -256,8 +256,7 @@ const games = [
   {
     slug: "oath-of-the-pale-sun",
     title: "Oath of the Pale Sun",
-    description:
-      "A tactical RPG about a holy order that has quietly stopped believing.",
+    description: "A tactical RPG about a holy order that has quietly stopped believing.",
     price: 52.99,
     releaseDate: new Date("2025-08-08"),
     imageUrl: null,
@@ -396,8 +395,7 @@ const games = [
   {
     slug: "the-amber-court",
     title: "The Amber Court",
-    description:
-      "A courtly intrigue RPG where the only combat system is conversation.",
+    description: "A courtly intrigue RPG where the only combat system is conversation.",
     price: 36.99,
     releaseDate: new Date("2024-02-08"),
     imageUrl: null,

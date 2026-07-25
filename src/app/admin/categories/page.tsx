@@ -53,9 +53,7 @@ export default async function AdminCategoriesPage({
                       size="sm"
                       nativeButton={false}
                       render={
-                        <Link href={`/admin/categories/${category.id}/edit`}>
-                          Edit
-                        </Link>
+                        <Link href={`/admin/categories/${category.id}/edit`}>Edit</Link>
                       }
                     />
                     <form

@@ -24,9 +24,7 @@ export default async function GameDetailPage({
 
   const session = await auth();
   const isUpcoming = game.releaseDate > new Date();
-  const owned = session?.user
-    ? await isGameOwned(session.user.id, game.id)
-    : false;
+  const owned = session?.user ? await isGameOwned(session.user.id, game.id) : false;
   const preordered =
     session?.user && isUpcoming
       ? await isGamePreordered(session.user.id, game.id)

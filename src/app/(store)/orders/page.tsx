@@ -34,8 +34,7 @@ export default async function OrdersPage() {
               <div>
                 <p className="font-medium">Order #{order.id.slice(-8)}</p>
                 <p className="text-sm text-muted-foreground">
-                  {order.createdAt.toLocaleDateString()} ·{" "}
-                  {order.items.length} item
+                  {order.createdAt.toLocaleDateString()} · {order.items.length} item
                   {order.items.length === 1 ? "" : "s"} · {order.status}
                 </p>
               </div>

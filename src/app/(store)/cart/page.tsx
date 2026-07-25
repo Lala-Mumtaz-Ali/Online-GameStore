@@ -3,10 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCart } from "@/data/cart";
 import { Button } from "@/components/ui/button";
-import {
-  updateCartItemQuantityAction,
-  removeCartItemAction,
-} from "./actions";
+import { updateCartItemQuantityAction, removeCartItemAction } from "./actions";
 
 export default async function CartPage() {
   const session = await auth();
@@ -15,10 +12,7 @@ export default async function CartPage() {
   }
 
   const items = await getCart();
-  const total = items.reduce(
-    (sum, item) => sum + item.game.price * item.quantity,
-    0
-  );
+  const total = items.reduce((sum, item) => sum + item.game.price * item.quantity, 0);
 
   if (items.length === 0) {
     return (
@@ -41,10 +35,7 @@ export default async function CartPage() {
 
       <div className="flex flex-col gap-4">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center gap-4 rounded-xl border p-4"
-          >
+          <div key={item.id} className="flex items-center gap-4 rounded-xl border p-4">
             <div className="flex h-20 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-xs text-muted-foreground">
               {item.game.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element

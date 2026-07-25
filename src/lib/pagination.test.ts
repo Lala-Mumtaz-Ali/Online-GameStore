@@ -73,7 +73,11 @@ describe("buildPageHref", () => {
   // The whole reason this helper exists: the old `?page=${n}` template silently
   // dropped every search, filter, and sort param on Next/Previous.
   it("preserves the other query params", () => {
-    const href = buildPageHref("/games", { q: "ronin", genre: "action", sort: "price-asc" }, 2);
+    const href = buildPageHref(
+      "/games",
+      { q: "ronin", genre: "action", sort: "price-asc" },
+      2
+    );
     const params = new URLSearchParams(href.split("?")[1]);
 
     expect(params.get("q")).toBe("ronin");
@@ -93,12 +97,17 @@ describe("buildPageHref", () => {
   });
 
   it("skips undefined values", () => {
-    expect(buildPageHref("/games", { q: undefined, genre: "rpg" }, 1)).toBe("/games?genre=rpg");
+    expect(buildPageHref("/games", { q: undefined, genre: "rpg" }, 1)).toBe(
+      "/games?genre=rpg"
+    );
   });
 
   it("preserves repeated params", () => {
     const href = buildPageHref("/games", { genre: ["action", "rpg"] }, 1);
-    expect(new URLSearchParams(href.split("?")[1]).getAll("genre")).toEqual(["action", "rpg"]);
+    expect(new URLSearchParams(href.split("?")[1]).getAll("genre")).toEqual([
+      "action",
+      "rpg",
+    ]);
   });
 
   // String concatenation produced a broken URL here; URLSearchParams encodes it.

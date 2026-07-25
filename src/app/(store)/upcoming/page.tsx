@@ -3,10 +3,7 @@ import { getOwnedGameIds } from "@/data/orders";
 import { GameCard } from "@/components/store/GameCard";
 
 export default async function UpcomingPage() {
-  const [games, ownedIds] = await Promise.all([
-    getUpcomingGames(),
-    getOwnedGameIds(),
-  ]);
+  const [games, ownedIds] = await Promise.all([getUpcomingGames(), getOwnedGameIds()]);
 
   return (
     <div>

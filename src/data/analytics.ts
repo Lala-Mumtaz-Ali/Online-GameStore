@@ -18,7 +18,13 @@ export async function getKpiSummary() {
   const totalRevenue = revenueAgg._sum.total ?? 0;
   const avgOrderValue = orderCount > 0 ? totalRevenue / orderCount : 0;
 
-  return { totalRevenue, totalOrders: orderCount, avgOrderValue, totalUsers, newUsers7d: newUsers };
+  return {
+    totalRevenue,
+    totalOrders: orderCount,
+    avgOrderValue,
+    totalUsers,
+    newUsers7d: newUsers,
+  };
 }
 
 export async function getRevenueTrend(days = 30) {
@@ -38,7 +44,7 @@ export async function getRevenueTrend(days = 30) {
     orders,
     (acc, key, row) => {
       const current = acc.get(key)!;
-      acc.set(key, { revenue: current.revenue + (row as typeof orders[number]).total });
+      acc.set(key, { revenue: current.revenue + (row as (typeof orders)[number]).total });
     },
     { revenue: 0 }
   );

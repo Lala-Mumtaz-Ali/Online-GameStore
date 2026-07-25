@@ -24,14 +24,20 @@ beforeEach(() => {
 
 describe("registerAction validation", () => {
   it("rejects an invalid email without touching the data layer", async () => {
-    const state = await registerAction({}, formData({ ...validInput, email: "not-an-email" }));
+    const state = await registerAction(
+      {},
+      formData({ ...validInput, email: "not-an-email" })
+    );
 
     expect(state).toEqual({ error: "Enter a valid email" });
     expect(mockRegisterUser).not.toHaveBeenCalled();
   });
 
   it("rejects a password shorter than 8 characters", async () => {
-    const state = await registerAction({}, formData({ ...validInput, password: "short7c" }));
+    const state = await registerAction(
+      {},
+      formData({ ...validInput, password: "short7c" })
+    );
 
     expect(state.error).toBe("Password must be at least 8 characters");
     expect(mockRegisterUser).not.toHaveBeenCalled();
@@ -65,7 +71,9 @@ describe("registerAction success path", () => {
 
 describe("registerAction error handling", () => {
   it("surfaces a domain error message to the form", async () => {
-    mockRegisterUser.mockRejectedValue(new Error("An account with this email already exists."));
+    mockRegisterUser.mockRejectedValue(
+      new Error("An account with this email already exists.")
+    );
 
     const state = await registerAction({}, formData(validInput));
 

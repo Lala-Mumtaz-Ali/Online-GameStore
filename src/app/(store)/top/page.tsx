@@ -2,10 +2,7 @@ import { getTopSellingGames, getOwnedGameIds } from "@/data/orders";
 import { GameCard } from "@/components/store/GameCard";
 
 export default async function TopSellersPage() {
-  const [games, ownedIds] = await Promise.all([
-    getTopSellingGames(),
-    getOwnedGameIds(),
-  ]);
+  const [games, ownedIds] = await Promise.all([getTopSellingGames(), getOwnedGameIds()]);
 
   return (
     <div>
@@ -29,9 +26,7 @@ export default async function TopSellersPage() {
                 imageUrl={game.imageUrl}
                 owned={ownedIds.has(game.id)}
               />
-              <p className="text-xs text-muted-foreground">
-                {game.unitsSold} sold
-              </p>
+              <p className="text-xs text-muted-foreground">{game.unitsSold} sold</p>
             </div>
           ))}
         </div>

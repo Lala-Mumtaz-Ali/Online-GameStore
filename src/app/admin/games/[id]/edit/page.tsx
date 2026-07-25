@@ -9,10 +9,7 @@ export default async function EditGamePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [game, categories] = await Promise.all([
-    getGameById(id),
-    getAllCategories(),
-  ]);
+  const [game, categories] = await Promise.all([getGameById(id), getAllCategories()]);
 
   if (!game) {
     notFound();

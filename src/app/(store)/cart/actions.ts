@@ -1,11 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  addToCart,
-  updateCartItemQuantity,
-  removeCartItem,
-} from "@/data/cart";
+import { addToCart, updateCartItemQuantity, removeCartItem } from "@/data/cart";
 
 export type AddToCartState = {
   success: boolean;
@@ -32,10 +28,7 @@ export async function addToCartAction(
   return { success: true, timestamp: Date.now() };
 }
 
-export async function updateCartItemQuantityAction(
-  cartItemId: string,
-  quantity: number
-) {
+export async function updateCartItemQuantityAction(cartItemId: string, quantity: number) {
   await updateCartItemQuantity(cartItemId, quantity);
   revalidatePath("/cart");
 }

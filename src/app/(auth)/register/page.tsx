@@ -13,10 +13,7 @@ const inputClassName =
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(
-    registerAction,
-    initialState
-  );
+  const [state, formAction, pending] = useActionState(registerAction, initialState);
 
   useEffect(() => {
     if (state.success) {
@@ -32,13 +29,7 @@ export default function RegisterPage() {
           <label htmlFor="name" className="text-sm font-medium">
             Name
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className={inputClassName}
-          />
+          <input id="name" name="name" type="text" required className={inputClassName} />
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="text-sm font-medium">

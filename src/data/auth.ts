@@ -51,9 +51,7 @@ export async function verifyEmailToken(token: string) {
 
   if (!record || record.expires < new Date()) {
     if (record) {
-      await prisma.verificationToken
-        .delete({ where: { token } })
-        .catch(() => {});
+      await prisma.verificationToken.delete({ where: { token } }).catch(() => {});
     }
     return {
       success: false as const,

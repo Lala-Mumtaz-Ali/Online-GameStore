@@ -33,9 +33,7 @@ export default async function AdminOrdersPage({
           <tbody>
             {orders.map((order) => (
               <tr key={order.id} className="border-b last:border-0">
-                <td className="p-3 font-mono text-xs">
-                  {order.id.slice(-8)}
-                </td>
+                <td className="p-3 font-mono text-xs">{order.id.slice(-8)}</td>
                 <td className="p-3">
                   {order.user.name ?? order.user.email ?? "Unknown"}
                 </td>

@@ -14,21 +14,25 @@ This is a **full-stack** project, which means it includes both:
 ## ✨ What can you do in the app?
 
 ### As a regular user
+
 - **Browse the storefront** — explore games by genre, see what's new, upcoming, or top-selling, and open a detail page for each game.
 - **Create an account** — sign up with email + password (with email verification) or sign in with Google.
-- **Shop** — add games to a cart and check out. Payment is *simulated* (clearly labeled — no real payment is processed), so you can test the full buying flow safely.
+- **Shop** — add games to a cart and check out. Payment is _simulated_ (clearly labeled — no real payment is processed), so you can test the full buying flow safely.
 - **Own a library** — every purchased game goes into your personal library. The store remembers what you own, so you can't accidentally buy the same game twice.
 - **Preorder** — reserve unreleased games. On release day, the system automatically completes the purchase for you.
 - **Get notified** — a notification bell in the app shows order confirmations, release-day purchases, and other updates.
 
 ### As an admin
+
 - **Manage the store** — add, edit, and delete games and categories from an admin dashboard.
 - **Handle orders** — view and manage customer orders.
 - **See analytics** — a dashboard with charts showing revenue, orders, signups, top-selling games, and revenue by category.
 - **Get reports** — a weekly summary email is sent to the admin automatically.
 
 ### Things that happen automatically (no human needed)
+
 Scheduled jobs (called "cron jobs") run in the background to:
+
 - Send order confirmation emails.
 - Remind users about items left in their cart.
 - Auto-purchase preorders on release day and notify the buyer.
@@ -38,22 +42,22 @@ Scheduled jobs (called "cron jobs") run in the background to:
 
 ## 🛠️ Technologies used (and what each one does)
 
-| Technology | What it is | What we use it for |
-|---|---|---|
-| **[Next.js 16](https://nextjs.org)** | A framework built on top of React | The foundation of the whole app — it handles pages, routing (which URL shows which page), and server-side code, all in one project |
-| **[React 19](https://react.dev)** | A library for building user interfaces | Building every page and interactive component (buttons, forms, the cart, etc.) |
-| **[TypeScript](https://www.typescriptlang.org)** | JavaScript with types added | Catching bugs while writing code instead of discovering them in the browser |
-| **[PostgreSQL](https://www.postgresql.org)** (hosted on [Supabase](https://supabase.com)) | A database | Storing everything permanent: users, games, orders, carts, notifications |
-| **[Prisma](https://www.prisma.io)** | An ORM (a tool that lets code talk to the database) | Reading and writing database records with TypeScript instead of raw SQL |
-| **[NextAuth v5](https://authjs.dev)** | An authentication library | Sign-up, login (email/password + Google), and keeping users logged in securely |
-| **[Tailwind CSS v4](https://tailwindcss.com)** | A CSS framework | Styling the app with small utility classes instead of writing custom CSS files |
-| **[shadcn/ui](https://ui.shadcn.com)** | A collection of pre-built UI components | Nice-looking buttons, dialogs, forms, and menus without building them from scratch |
-| **[Zod](https://zod.dev)** | A validation library | Checking that user input (like registration forms) is valid before trusting it |
-| **[Resend](https://resend.com)** | An email service | Sending real emails: verification links, order confirmations, weekly reports |
-| **[Recharts](https://recharts.org)** | A charting library | Drawing the graphs on the admin analytics dashboard |
-| **[Vercel](https://vercel.com)** | A hosting platform | Running the deployed app and triggering the scheduled background jobs |
-| **[Vitest](https://vitest.dev)** | A unit-test runner | Testing pure logic — pagination math, date bucketing, email escaping, auth guards |
-| **[Playwright](https://playwright.dev)** | A browser-automation test tool | End-to-end tests that drive a real browser against a real build |
+| Technology                                                                                | What it is                                          | What we use it for                                                                                                                 |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **[Next.js 16](https://nextjs.org)**                                                      | A framework built on top of React                   | The foundation of the whole app — it handles pages, routing (which URL shows which page), and server-side code, all in one project |
+| **[React 19](https://react.dev)**                                                         | A library for building user interfaces              | Building every page and interactive component (buttons, forms, the cart, etc.)                                                     |
+| **[TypeScript](https://www.typescriptlang.org)**                                          | JavaScript with types added                         | Catching bugs while writing code instead of discovering them in the browser                                                        |
+| **[PostgreSQL](https://www.postgresql.org)** (hosted on [Supabase](https://supabase.com)) | A database                                          | Storing everything permanent: users, games, orders, carts, notifications                                                           |
+| **[Prisma](https://www.prisma.io)**                                                       | An ORM (a tool that lets code talk to the database) | Reading and writing database records with TypeScript instead of raw SQL                                                            |
+| **[NextAuth v5](https://authjs.dev)**                                                     | An authentication library                           | Sign-up, login (email/password + Google), and keeping users logged in securely                                                     |
+| **[Tailwind CSS v4](https://tailwindcss.com)**                                            | A CSS framework                                     | Styling the app with small utility classes instead of writing custom CSS files                                                     |
+| **[shadcn/ui](https://ui.shadcn.com)**                                                    | A collection of pre-built UI components             | Nice-looking buttons, dialogs, forms, and menus without building them from scratch                                                 |
+| **[Zod](https://zod.dev)**                                                                | A validation library                                | Checking that user input (like registration forms) is valid before trusting it                                                     |
+| **[Resend](https://resend.com)**                                                          | An email service                                    | Sending real emails: verification links, order confirmations, weekly reports                                                       |
+| **[Recharts](https://recharts.org)**                                                      | A charting library                                  | Drawing the graphs on the admin analytics dashboard                                                                                |
+| **[Vercel](https://vercel.com)**                                                          | A hosting platform                                  | Running the deployed app and triggering the scheduled background jobs                                                              |
+| **[Vitest](https://vitest.dev)**                                                          | A unit-test runner                                  | Testing pure logic — pagination math, date bucketing, email escaping, auth guards                                                  |
+| **[Playwright](https://playwright.dev)**                                                  | A browser-automation test tool                      | End-to-end tests that drive a real browser against a real build                                                                    |
 
 ---
 
@@ -104,15 +108,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser — you shou
 
 ## 🧪 Tests
 
-| Command | What it does |
-|---|---|
-| `npm test` | Unit tests ([Vitest](https://vitest.dev)) — pure logic, no network, no database |
-| `npm run test:watch` | The same suite in watch mode |
-| `npm run test:coverage` | Unit tests with a V8 coverage report |
-| `npm run test:e2e` | End-to-end browser tests ([Playwright](https://playwright.dev)) |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier |
+| Command                 | What it does                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `npm test`              | Unit tests ([Vitest](https://vitest.dev)) — pure logic, no network, no database |
+| `npm run test:watch`    | The same suite in watch mode                                                    |
+| `npm run test:coverage` | Unit tests with a V8 coverage report                                            |
+| `npm run test:e2e`      | End-to-end browser tests ([Playwright](https://playwright.dev))                 |
+| `npm run typecheck`     | `tsc --noEmit`                                                                  |
+| `npm run lint`          | ESLint                                                                          |
+| `npm run format`        | Prettier                                                                        |
 
 **Unit tests mock Prisma rather than hitting a database.** The only database this project has is a
 remote Supabase instance holding live data, so a unit suite that connected to it would be slow,
@@ -168,7 +172,7 @@ e2e/                # Playwright end-to-end specs
 
 A few design decisions worth knowing about:
 
-- **Security lives in the data layer.** Every function in `src/data/` that changes data checks *itself* whether the current user is allowed to do it — even if the page already checked. This "defense in depth" approach means a bug in one page can't accidentally expose admin actions.
+- **Security lives in the data layer.** Every function in `src/data/` that changes data checks _itself_ whether the current user is allowed to do it — even if the page already checked. This "defense in depth" approach means a bug in one page can't accidentally expose admin actions.
 - **Route groups** like `(store)` and `(auth)` organize files without affecting URLs, while `admin/` is a real URL segment so all admin pages clearly live under `/admin`.
 - **Cron endpoints are protected** with a secret token, so random visitors can't trigger the background jobs.
 - **Emails escape user input** before inserting it into HTML, preventing injection attacks.

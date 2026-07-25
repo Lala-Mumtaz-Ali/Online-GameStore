@@ -13,8 +13,7 @@ export function Pagination({
 
   const prevPage = Math.max(1, page - 1);
   const nextPage = Math.min(totalPages, page + 1);
-  const linkClass =
-    "rounded-lg border px-3 py-1.5 text-sm hover:bg-muted";
+  const linkClass = "rounded-lg border px-3 py-1.5 text-sm hover:bg-muted";
   const disabledClass = "pointer-events-none opacity-50";
 
   return (

@@ -59,7 +59,9 @@ test.describe("registration and sign in", () => {
       if (attempt === 1) await expect(page).toHaveURL(/\/login$/);
     }
 
-    await expect(page.getByText("An account with this email already exists.")).toBeVisible();
+    await expect(
+      page.getByText("An account with this email already exists.")
+    ).toBeVisible();
   });
 
   test("protected pages redirect anonymous visitors to sign in", async ({ page }) => {

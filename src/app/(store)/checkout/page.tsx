@@ -15,10 +15,7 @@ export default async function CheckoutPage() {
     redirect("/cart");
   }
 
-  const total = items.reduce(
-    (sum, item) => sum + item.game.price * item.quantity,
-    0
-  );
+  const total = items.reduce((sum, item) => sum + item.game.price * item.quantity, 0);
 
   return (
     <div className="mx-auto max-w-lg">
@@ -45,15 +42,13 @@ export default async function CheckoutPage() {
       <form action={checkoutAction} className="rounded-xl border p-4">
         <h2 className="mb-1 font-semibold">Payment</h2>
         <p className="mb-3 text-xs text-muted-foreground">
-          This is a simulated payment for testing purposes — no real charge
-          will be made and no card details are stored.
+          This is a simulated payment for testing purposes — no real charge will be made
+          and no card details are stored.
         </p>
 
         <div className="flex flex-col gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Card number
-            </label>
+            <label className="mb-1 block text-sm font-medium">Card number</label>
             <input
               type="text"
               inputMode="numeric"
@@ -64,9 +59,7 @@ export default async function CheckoutPage() {
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="mb-1 block text-sm font-medium">
-                Expiry
-              </label>
+              <label className="mb-1 block text-sm font-medium">Expiry</label>
               <input
                 type="text"
                 placeholder="MM/YY"

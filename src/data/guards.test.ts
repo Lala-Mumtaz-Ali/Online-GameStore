@@ -6,7 +6,9 @@ import { prismaMock, resetPrismaMock } from "@/test/prismaMock";
 const { mockAuth } = vi.hoisted(() => ({ mockAuth: vi.fn() }));
 
 vi.mock("@/auth", () => ({ auth: mockAuth }));
-vi.mock("@/db", async () => ({ default: (await import("@/test/prismaMock")).prismaMock }));
+vi.mock("@/db", async () => ({
+  default: (await import("@/test/prismaMock")).prismaMock,
+}));
 
 const { requireAdmin } = await import("@/data/admin");
 const { requireUser } = await import("@/data/session");

@@ -11,11 +11,7 @@ import {
 } from "recharts";
 import { ChartTooltip } from "./ChartTooltip";
 
-export function OrderTrendChart({
-  data,
-}: {
-  data: { date: string; orders: number }[];
-}) {
+export function OrderTrendChart({ data }: { data: { date: string; orders: number }[] }) {
   return (
     <div className="rounded-xl border p-4">
       <h3 className="mb-4 text-sm font-semibold">Orders — last 30 days</h3>

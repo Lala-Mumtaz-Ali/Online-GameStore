@@ -57,7 +57,13 @@ export function TopSellersChart({
             cursor={{ fill: "var(--muted)" }}
             content={<ChartTooltip valueFormatter={(v) => `${v} sold`} />}
           />
-          <Bar dataKey="unitsSold" name="Units sold" fill="var(--chart-1)" radius={[0, 4, 4, 0]} maxBarSize={24}>
+          <Bar
+            dataKey="unitsSold"
+            name="Units sold"
+            fill="var(--chart-1)"
+            radius={[0, 4, 4, 0]}
+            maxBarSize={24}
+          >
             <LabelList
               dataKey="unitsSold"
               position="right"

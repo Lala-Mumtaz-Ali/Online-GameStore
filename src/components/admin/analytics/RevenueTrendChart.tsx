@@ -38,9 +38,7 @@ export function RevenueTrendChart({
             width={56}
           />
           <Tooltip
-            content={
-              <ChartTooltip valueFormatter={(v) => `$${v.toFixed(2)}`} />
-            }
+            content={<ChartTooltip valueFormatter={(v) => `$${v.toFixed(2)}`} />}
           />
           <Area
             type="monotone"

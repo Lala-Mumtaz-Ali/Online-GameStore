@@ -139,10 +139,7 @@ export async function createGame({ categorySlugs, ...data }: GameInput) {
   });
 }
 
-export async function updateGame(
-  id: string,
-  { categorySlugs, ...data }: GameInput
-) {
+export async function updateGame(id: string, { categorySlugs, ...data }: GameInput) {
   await requireAdmin();
   return prisma.game.update({
     where: { id },

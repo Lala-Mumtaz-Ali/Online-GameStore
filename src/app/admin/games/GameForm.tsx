@@ -10,10 +10,7 @@ const inputClassName =
 
 type GameFormProps = {
   categories: Category[];
-  action: (
-    state: GameFormState,
-    formData: FormData
-  ) => Promise<GameFormState>;
+  action: (state: GameFormState, formData: FormData) => Promise<GameFormState>;
   defaultValues?: {
     slug: string;
     title: string;
@@ -120,17 +117,12 @@ export function GameForm({
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-medium">Categories</legend>
         {categories.map((category) => (
-          <label
-            key={category.id}
-            className="flex items-center gap-2 text-sm"
-          >
+          <label key={category.id} className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               name="categorySlugs"
               value={category.slug}
-              defaultChecked={defaultValues?.categorySlugs.includes(
-                category.slug
-              )}
+              defaultChecked={defaultValues?.categorySlugs.includes(category.slug)}
             />
             {category.name}
           </label>

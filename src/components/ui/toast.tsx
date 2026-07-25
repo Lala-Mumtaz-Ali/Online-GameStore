@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { Toast } from "@base-ui/react/toast"
-import { cn } from "@/lib/utils"
+import { Toast } from "@base-ui/react/toast";
+import { cn } from "@/lib/utils";
 
-export const ToastProvider = Toast.Provider
-export const useToastManager = Toast.useToastManager
+export const ToastProvider = Toast.Provider;
+export const useToastManager = Toast.useToastManager;
 
 function ToastList() {
-  const { toasts } = useToastManager()
+  const { toasts } = useToastManager();
 
   return toasts.map((toast) => (
     <Toast.Root
@@ -33,7 +33,7 @@ function ToastList() {
         &times;
       </Toast.Close>
     </Toast.Root>
-  ))
+  ));
 }
 
 export function Toaster() {
@@ -43,5 +43,5 @@ export function Toaster() {
         <ToastList />
       </Toast.Viewport>
     </Toast.Portal>
-  )
+  );
 }
