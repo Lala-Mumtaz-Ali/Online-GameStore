@@ -53,6 +53,9 @@ export async function Navbar() {
                   Admin
                 </Link>
               )}
+              <Link href="/account" className="text-sm font-medium hover:underline">
+                {session.user.name ?? "Account"}
+              </Link>
               <NotificationBell
                 initialNotifications={notifications.map((n) => ({
                   id: n.id,

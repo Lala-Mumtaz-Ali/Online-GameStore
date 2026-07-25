@@ -5,12 +5,23 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { safeCallbackUrl } from "@/lib/redirects";
 
 const inputClassName =
   "rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
 
-export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function LoginForm({
+  googleEnabled,
+  callbackUrl,
+}: {
+  googleEnabled: boolean;
+  callbackUrl?: string;
+}) {
   const router = useRouter();
+  // Pages like /library and /account redirect here with ?callbackUrl=..., which
+  // was previously ignored. It is untrusted, so it is reduced to a same-origin
+  // path before being used for navigation.
+  const destination = safeCallbackUrl(callbackUrl);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -33,7 +44,7 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
       return;
     }
 
-    router.push("/");
+    router.push(destination);
     router.refresh();
   }
 
@@ -94,7 +105,7 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
             type="button"
             variant="outline"
             className="w-full"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl: destination })}
           >
             Continue with Google
           </Button>

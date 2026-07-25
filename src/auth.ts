@@ -60,11 +60,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id!;
         token.role = user.role;
       }
+
+      // Client-initiated refresh via useSession().update({ name }).
+      // Without this a profile rename would not appear in the server-rendered
+      // navbar until the user signed out and back in.
+      //
+      // The narrowing is verbose because NextAuth types this argument loosely,
+      // and it is untrusted client input: only the name is copied across.
+      if (
+        trigger === "update" &&
+        typeof session === "object" &&
+        session !== null &&
+        "name" in session &&
+        typeof (session as { name?: unknown }).name === "string"
+      ) {
+        token.name = (session as { name: string }).name;
+      }
+
       return token;
     },
     async session({ session, token }) {

@@ -19,6 +19,7 @@ This is a **full-stack** project, which means it includes both:
 - **Search and filter the catalogue** — search by title from the navbar, filter by genre, and sort by title, price, or release date. Everything lives in the URL, so any view is shareable and bookmarkable.
 - **Create an account** — sign up with email + password (with email verification) or sign in with Google.
 - **Reset a forgotten password** — request a link by email, then set a new password. Links are single-use and expire after an hour.
+- **Manage your account** — change your display name, change (or set) your password, resend the verification email, and see your role, join date, and order count.
 - **Shop** — add games to a cart and check out. Payment is _simulated_ (clearly labeled — no real payment is processed), so you can test the full buying flow safely.
 - **Own a library** — every purchased game goes into your personal library. The store remembers what you own, so you can't accidentally buy the same game twice.
 - **Preorder** — reserve unreleased games. On release day, the system automatically completes the purchase for you.
@@ -218,6 +219,7 @@ A few design decisions worth knowing about:
 - **The forgot-password form never reveals whether an account exists.** It reports the same message either way, including when the per-account throttle (3 requests per 15 minutes) silently drops the request.
 - **Catalogue state lives in the URL, not in React state.** `/games?q=…&genre=…&sort=…&page=…` is the single source of truth, so the server renders the exact view you're looking at, the back button works, and links are shareable. Only the search box and the two filter selects are client components; everything else stays a Server Component.
 - **The sort parameter is a whitelist, never a raw string.** `?sort=` is parsed through a Zod enum into a lookup map, so a hand-edited URL can't reach `orderBy`. Same for the genre slug, which must match a slug-shaped pattern. Bad values fall back to defaults rather than erroring — a public page shouldn't 500 because someone typed in the address bar.
+- **`callbackUrl` is validated before use.** Pages like `/library` and `/account` redirect to `/login?callbackUrl=…`, which the sign-in form previously ignored entirely (it always went to `/`). Honouring it naively is an open redirect: `//evil.com` is a protocol-relative URL that passes a `startsWith("/")` check and navigates off-site, which is what makes a phishing link look legitimate. It's now reduced to a same-origin path first.
 - **Pagination orders by a unique tiebreaker.** Sorting by price alone means rows with equal prices have no defined order, so OFFSET paging can show the same game twice or skip one entirely. Every catalogue query ends with `{ id: "asc" }`. The `count()` also always uses the exact same `where` as the `findMany()`.
 
 ---
