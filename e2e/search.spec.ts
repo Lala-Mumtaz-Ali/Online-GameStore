@@ -1,6 +1,38 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const gameCards = 'a[href^="/games/"]';
+
+/**
+ * Record every URL the page moves through, including client-side replaces that
+ * leave no history entry. Used to prove a search settles on one URL instead of
+ * oscillating.
+ */
+async function recordUrlChanges(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as { __urlLog: string[] };
+    w.__urlLog = [location.pathname + location.search];
+
+    const record = () => {
+      const url = location.pathname + location.search;
+      if (w.__urlLog[w.__urlLog.length - 1] !== url) w.__urlLog.push(url);
+    };
+
+    for (const method of ["pushState", "replaceState"] as const) {
+      const original = history[method].bind(history);
+      history[method] = (data: unknown, unused: string, url?: string | URL | null) => {
+        original(data, unused, url);
+        record();
+      };
+    }
+
+    window.addEventListener("popstate", record);
+    setInterval(record, 50);
+  });
+}
+
+function readUrlLog(page: Page) {
+  return page.evaluate(() => (window as unknown as { __urlLog: string[] }).__urlLog);
+}
 
 test.describe("catalogue search and filtering", () => {
   test("typing in the navbar search updates the URL after the debounce", async ({
@@ -25,6 +57,55 @@ test.describe("catalogue search and filtering", () => {
     // One entry for the whole search, so a single Back returns to the home page.
     await page.goBack();
     await expect(page).toHaveURL("/");
+
+    // And it STAYS there. A search box holding stale text used to re-apply its
+    // own query on arrival, shoving the user straight back forward again.
+    await page.waitForTimeout(1500);
+    await expect(page).toHaveURL("/");
+    await expect(page.getByLabel("Search games").first()).toHaveValue("");
+  });
+
+  /**
+   * Regression: /games mounts two copies of the search box (navbar above `sm`,
+   * page below), each with its own local text state. Both were live, so typing
+   * in one wrote `?q=...` and the other — still holding an empty string — wrote
+   * it straight back off, flipping the page between the two states forever.
+   */
+  test("the search settles on one URL instead of oscillating", async ({ page }) => {
+    await page.goto("/games");
+    await recordUrlChanges(page);
+
+    await page.getByLabel("Search games").first().fill("ass");
+    await expect(page).toHaveURL(/[?&]q=ass/);
+
+    // Well past the 300ms debounce: any feedback loop would have flipped by now.
+    await page.waitForTimeout(2000);
+
+    expect(await readUrlLog(page)).toEqual(["/games", "/games?q=ass"]);
+    await expect(page).toHaveURL(/[?&]q=ass/);
+  });
+
+  test("both search boxes end up showing the same text", async ({ page }) => {
+    await page.goto("/games");
+
+    await page.getByLabel("Search games").first().fill("ember");
+    await expect(page).toHaveURL(/[?&]q=ember/);
+
+    const boxes = page.getByLabel("Search games");
+    for (let i = 0; i < (await boxes.count()); i++) {
+      await expect(boxes.nth(i)).toHaveValue("ember");
+    }
+  });
+
+  test("Clear filters resets the search box, not just the URL", async ({ page }) => {
+    await page.goto("/games?q=ember");
+
+    await page.getByRole("link", { name: "Clear filters" }).first().click();
+
+    await expect(page).toHaveURL("/games");
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveURL("/games");
+    await expect(page.getByLabel("Search games").first()).toHaveValue("");
   });
 
   test("a search with no matches shows the empty state", async ({ page }) => {

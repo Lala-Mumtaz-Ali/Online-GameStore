@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useDebouncedQueryInput } from "@/hooks/useDebouncedQueryInput";
 import { useListQueryParams } from "@/hooks/useListQueryParams";
-
-const DEBOUNCE_MS = 300;
 
 /**
  * Debounced catalogue search.
@@ -11,20 +10,21 @@ const DEBOUNCE_MS = 300;
  * Uses useSearchParams, so every render site MUST wrap this in <Suspense> -
  * without a boundary Next opts the whole enclosing route into client-side
  * rendering.
+ *
+ * Two copies of this are mounted on /games (navbar above `sm`, page below).
+ * useDebouncedQueryInput is what keeps them from fighting each other over the
+ * query string - see the comment there.
  */
 export function GameSearchInput({ className }: { className?: string }) {
   const { searchParams, apply, isPending } = useListQueryParams("/games");
   const currentQuery = searchParams.get("q") ?? "";
-  const [value, setValue] = useState(currentQuery);
 
-  useEffect(() => {
-    // Nothing to do when the box already agrees with the URL. This is what
-    // stops a navigation firing on mount, and on back/forward navigation.
-    if (value === currentQuery) return;
+  const commit = useCallback(
+    (query: string) => apply({ q: query || undefined }),
+    [apply]
+  );
 
-    const timer = setTimeout(() => apply({ q: value.trim() || undefined }), DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [value, currentQuery, apply]);
+  const [value, setValue] = useDebouncedQueryInput(currentQuery, commit);
 
   return (
     <input

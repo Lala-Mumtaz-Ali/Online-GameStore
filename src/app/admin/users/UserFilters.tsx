@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import Link from "next/link";
+import { useDebouncedQueryInput } from "@/hooks/useDebouncedQueryInput";
 import { useListQueryParams } from "@/hooks/useListQueryParams";
-
-const DEBOUNCE_MS = 300;
 
 const controlClassName =
   "rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -19,14 +18,13 @@ export function UserFilters({
   hasFilters: boolean;
 }) {
   const { apply, isPending } = useListQueryParams("/admin/users");
-  const currentQuery = q ?? "";
-  const [value, setValue] = useState(currentQuery);
 
-  useEffect(() => {
-    if (value === currentQuery) return;
-    const timer = setTimeout(() => apply({ q: value.trim() || undefined }), DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [value, currentQuery, apply]);
+  const commit = useCallback(
+    (query: string) => apply({ q: query || undefined }),
+    [apply]
+  );
+
+  const [value, setValue] = useDebouncedQueryInput(q ?? "", commit);
 
   return (
     <div className="mb-6 flex flex-wrap items-end gap-3" aria-busy={isPending}>
