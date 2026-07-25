@@ -31,7 +31,9 @@ export function GameCard({ slug, title, price, imageUrl, owned = false }: GameCa
       <div className="flex flex-col gap-1 p-3">
         <h3 className="line-clamp-1 font-medium leading-tight">{title}</h3>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">${price.toFixed(2)}</p>
+          <p className="text-sm text-muted-foreground">
+            {price === 0 ? "Free to Play" : `$${price.toFixed(2)}`}
+          </p>
           {owned && (
             <span className="rounded-full border border-primary/50 px-2 py-0.5 text-xs font-medium text-primary">
               Owned

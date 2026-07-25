@@ -111,7 +111,32 @@ model Game {
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
   releaseAutomationRanAt DateTime?
+
+  // ---- Imported store metadata -------------------------------------------
+  // Populated by scripts/import-steam-games.ts. All optional: a game created by
+  // hand in the admin dashboard has none of it, and every page must still work.
+
+  /// Source app id. Unique so re-importing updates rather than duplicates.
+  steamAppId            Int?        @unique
+  /// Rich store description. Sanitised on import - see the importer.
+  aboutHtml             String?
+  /// Landscape banner, as opposed to `imageUrl`'s portrait cover.
+  headerImage           String?
+  developer             String?
+  publisher             String?
+  metacriticScore       Int?
+  metacriticUrl         String?
+  /// Total store recommendations, shown as a rough popularity signal.
+  reviewCount           Int?
+  website               String?
+  onWindows             Boolean     @default(true)
+  onMac                 Boolean     @default(false)
+  onLinux               Boolean     @default(false)
+
   categories            Category[]
+  features              Feature[]
+  screenshots           GameScreenshot[]
+  trailers              GameTrailer[]
   cartItems             CartItem[]
   orderItems            OrderItem[]
   preorders             Preorder[]
@@ -131,6 +156,58 @@ model Category {
   name  String
   slug  String @unique
   games Game[]
+
+  /// Source genre id, so re-imports match on identity rather than on a name
+  /// that could be re-worded upstream. Null for categories created by hand.
+  steamGenreId Int? @unique
+}
+
+/// A store feature tag: Single-player, Co-op, Steam Achievements, and so on.
+///
+/// Kept separate from Category because they answer different questions - a
+/// genre is what the game *is*, a feature is what it *supports* - and only
+/// genres drive the storefront filter.
+model Feature {
+  id String @id @default(cuid())
+  /// Identity is the slug, not the upstream id: Steam lists some features under
+  /// two different ids with the same name (55 and 56 are both "DualShock
+  /// Controller Support"), which would otherwise produce duplicate rows and
+  /// show the same tag twice on a game page.
+  slug    String @unique
+  name    String
+  /// First upstream id seen for this feature. Informational only.
+  steamId Int
+  games   Game[]
+}
+
+model GameScreenshot {
+  id           String @id @default(cuid())
+  gameId       String
+  url          String
+  thumbnailUrl String
+  /// Preserves the upstream ordering, which is curated rather than arbitrary.
+  position     Int
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, position])
+  @@index([gameId])
+}
+
+model GameTrailer {
+  id           String @id @default(cuid())
+  gameId       String
+  name         String
+  thumbnailUrl String
+  /// HLS manifest. Steam serves no progressive MP4, so playback needs a
+  /// streaming player rather than a plain <video src>.
+  hlsUrl       String
+  position     Int
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, position])
+  @@index([gameId])
 }
 
 model CartItem {

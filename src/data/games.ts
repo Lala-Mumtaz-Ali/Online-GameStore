@@ -107,7 +107,12 @@ export async function getPaginatedGames({
 export function getGameBySlug(slug: string) {
   return prisma.game.findUnique({
     where: { slug },
-    include: { categories: true },
+    include: {
+      categories: { orderBy: { name: "asc" } },
+      features: { orderBy: { name: "asc" } },
+      screenshots: { orderBy: { position: "asc" } },
+      trailers: { orderBy: { position: "asc" } },
+    },
   });
 }
 

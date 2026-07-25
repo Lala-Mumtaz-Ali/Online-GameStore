@@ -137,3 +137,33 @@
     @apply font-sans;
   }
 }
+
+/* Rich store descriptions imported from Steam. The markup is sanitised at
+   import time to a small tag allowlist, but it arrives unstyled, so give it
+   readable defaults rather than letting it inherit bare browser styles. */
+.steam-about img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.steam-about h1,
+.steam-about h2,
+.steam-about h3,
+.steam-about h4 {
+  color: var(--foreground);
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+.steam-about p {
+  margin: 0.75rem 0;
+}
+.steam-about ul,
+.steam-about ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.steam-about a {
+  text-decoration: underline;
+}

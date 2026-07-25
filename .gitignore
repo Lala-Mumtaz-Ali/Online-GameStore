@@ -49,3 +49,6 @@ next-env.d.ts
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Cached Steam API responses (scripts/import-steam-games.ts)
+/.steam-cache
