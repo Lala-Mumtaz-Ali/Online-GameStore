@@ -51,6 +51,15 @@ export const prismaMock = {
     delete: vi.fn(),
     deleteMany: vi.fn(),
   },
+  passwordResetToken: {
+    findUnique: vi.fn(),
+    count: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    deleteMany: vi.fn(),
+  },
+  // Callback form: runs the callback against the same mock, so code under test
+  // sees a `tx` client that behaves like the outer one.
   $transaction: vi.fn(),
 };
 

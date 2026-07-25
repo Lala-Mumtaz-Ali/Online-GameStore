@@ -17,6 +17,7 @@ This is a **full-stack** project, which means it includes both:
 
 - **Browse the storefront** — explore games by genre, see what's new, upcoming, or top-selling, and open a detail page for each game.
 - **Create an account** — sign up with email + password (with email verification) or sign in with Google.
+- **Reset a forgotten password** — request a link by email, then set a new password. Links are single-use and expire after an hour.
 - **Shop** — add games to a cart and check out. Payment is _simulated_ (clearly labeled — no real payment is processed), so you can test the full buying flow safely.
 - **Own a library** — every purchased game goes into your personal library. The store remembers what you own, so you can't accidentally buy the same game twice.
 - **Preorder** — reserve unreleased games. On release day, the system automatically completes the purchase for you.
@@ -83,7 +84,43 @@ Copy `.env.example` to `.env` and fill in the values (database connection string
 npx prisma migrate deploy
 ```
 
-> **Troubleshooting:** on some machines `prisma migrate dev` hangs indefinitely (an issue with Prisma's schema-engine binary). If that happens to you, generate the SQL manually with `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script`, run it directly against your database (`DIRECT_URL`), and record it in the `_prisma_migrations` table. The files in `prisma/migrations/` contain the exact SQL for this schema.
+<details>
+<summary><strong>Troubleshooting: <code>prisma migrate dev</code> hangs</strong></summary>
+
+On some machines Prisma's schema-engine binary hangs indefinitely. `migrate dev` and
+`migrate resolve` are both affected; `migrate diff`, `db execute`, and `migrate deploy` are not.
+This is the workaround used to author the migrations in this repo:
+
+```bash
+# 1. Generate the delta between the live database and the schema.
+npx prisma migrate diff \
+  --from-url "$DIRECT_URL" \
+  --to-schema-datamodel prisma/schema.prisma \
+  --script > prisma/migrations/<timestamp>_<name>/migration.sql
+
+# 2. Apply it (db execute does not use the schema engine).
+npx prisma db execute \
+  --file prisma/migrations/<timestamp>_<name>/migration.sql \
+  --url "$DIRECT_URL"
+
+# 3. Record it as applied. `migrate resolve --applied <name>` is the supported
+#    way, but it hangs too, so insert the row directly. The checksum is the
+#    SHA-256 of migration.sql (`sha256sum` on the file).
+#    -> INSERT INTO "_prisma_migrations" (id, checksum, finished_at,
+#         migration_name, started_at, applied_steps_count)
+#       VALUES (gen_random_uuid()::text, '<sha256>', now(), '<name>', now(), 1);
+
+# 4.
+npx prisma generate
+```
+
+`.gitattributes` pins `*.sql` to LF line endings, because a CRLF checkout would change each
+migration's checksum and `migrate deploy` would then refuse to run against an existing database.
+
+A fresh database (a clone, or the CI job) does not need any of this — `npx prisma migrate deploy`
+applies everything in `prisma/migrations/` normally.
+
+</details>
 
 **4. Seed the database**
 
@@ -176,6 +213,8 @@ A few design decisions worth knowing about:
 - **Route groups** like `(store)` and `(auth)` organize files without affecting URLs, while `admin/` is a real URL segment so all admin pages clearly live under `/admin`.
 - **Cron endpoints are protected** with a secret token, so random visitors can't trigger the background jobs.
 - **Emails escape user input** before inserting it into HTML, preventing injection attacks.
+- **Password reset tokens live in their own table, hashed.** They deliberately do _not_ reuse NextAuth's `VerificationToken`: that table is looked up by token value with no purpose check, so a reset token pasted into `/verify-email?token=…` would have verified the account's email address instead. Cross-purpose token confusion is a real vulnerability class, so the two token spaces are kept disjoint. Only a SHA-256 of each token is stored, so a leaked database backup can't be used to take over accounts.
+- **The forgot-password form never reveals whether an account exists.** It reports the same message either way, including when the per-account throttle (3 requests per 15 minutes) silently drops the request.
 
 ---
 
@@ -184,7 +223,9 @@ A few design decisions worth knowing about:
 This is a portfolio project, so a few things are intentionally simplified:
 
 - **No real payments** — checkout is simulated. Integrating a real gateway (like Stripe) would be the next step for a production store.
-- **No rate limiting** on login/register — a real app would add this (e.g., with Upstash Redis) to block brute-force attacks.
+- **Sessions can't be revoked on password reset.** Sessions are JWTs with no server-side session table, so a reset changes the password but does not sign out devices that are already logged in. Fixing it properly means either a `passwordChangedAt` column checked on every request (a database read on the auth path) or switching to database sessions. Both are real trade-offs rather than oversights, so this is documented instead of half-implemented.
+- **No IP-level rate limiting.** Password reset requests are throttled per account in the database (3 per 15 minutes), which is correct across serverless instances. Limiting by IP belongs at the edge — Vercel WAF or Upstash — and is out of scope here. An in-memory limiter would be per-instance on serverless, i.e. no limit at all.
+- **Email verification isn't enforced at login.** It's advisory: unverified accounts can still sign in.
 - **Simple pagination** — admin lists show 20 items per page, which is fine at this scale.
 
 ---

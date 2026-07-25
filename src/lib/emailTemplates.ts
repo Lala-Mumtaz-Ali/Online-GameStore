@@ -52,6 +52,27 @@ export function verifyEmailTemplate({
   );
 }
 
+export function resetPasswordTemplate({
+  name,
+  token,
+}: {
+  name: string | null;
+  token: string;
+}) {
+  const resetUrl = `${appUrl}/reset-password?token=${encodeURIComponent(token)}`;
+  return layout(
+    "Reset your password",
+    `
+    <p>Hi ${escapeHtml(name ?? "there")},</p>
+    <p>We received a request to reset the password on your GameStore account. Use the button below to choose a new one.</p>
+    <p><a href="${resetUrl}" style="display: inline-block; background: #4f46e5; color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Reset password</a></p>
+    <p style="font-size: 13px; color: #666;">This link expires in 1 hour and can only be used once.</p>
+    <p style="font-size: 13px; color: #666;">If you didn't request this, you can safely ignore this email &mdash; your password won't change.</p>
+    <p style="font-size: 13px; color: #666;">Or paste this link in your browser: ${resetUrl}</p>
+    `
+  );
+}
+
 export function orderConfirmationTemplate({
   name,
   orderId,

@@ -52,6 +52,35 @@ model User {
   preorders     Preorder[]
   notifyRequests ReleaseNotifyRequest[]
   notifications Notification[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+// Deliberately NOT reusing VerificationToken for password resets.
+//
+// 1. verifyEmailToken() looks a token up by value alone with no purpose check,
+//    so a reset token pasted into /verify-email?token=... would verify the
+//    user's email address. Cross-purpose token confusion is a real vuln class.
+// 2. sendVerificationEmail() does deleteMany({ identifier: email }), which would
+//    silently clobber a pending token of the other kind.
+// 3. VerificationToken belongs to the NextAuth PrismaAdapter contract; encoding
+//    app semantics into a library-owned table couples us to an upstream schema.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  // SHA-256 of the emailed token, never the token itself. The token is 256 bits
+  // of randomBytes entropy so it is not brute-forceable, which makes bcrypt
+  // pointless here (and its per-row salt would break this unique-index lookup).
+  // Hashing still matters: a leaked backup must not hand out account takeover.
+  tokenHash String    @unique
+  expires   DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  // Keyed by userId rather than email: User.email is nullable and mutable, and
+  // the cascade reaps tokens when an account is deleted.
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
