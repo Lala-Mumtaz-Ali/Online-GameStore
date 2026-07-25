@@ -18,5 +18,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     id: string;
     role: Role;
+    /** Epoch ms of the last role re-read; see the jwt callback in src/auth.ts. */
+    roleCheckedAt?: number;
   }
 }

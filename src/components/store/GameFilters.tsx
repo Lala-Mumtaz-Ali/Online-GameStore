@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { GAME_SORTS, GAME_SORT_LABELS, type GameSort } from "@/lib/gameQuery";
-import { useGameQueryParams } from "./useGameQueryParams";
+import { useListQueryParams } from "@/hooks/useListQueryParams";
 
 const selectClassName =
   "rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -18,7 +18,7 @@ export function GameFilters({
   sort: GameSort;
   hasFilters: boolean;
 }) {
-  const { apply, isPending } = useGameQueryParams();
+  const { apply, isPending } = useListQueryParams("/games");
 
   return (
     <div className="mb-6 flex flex-wrap items-end gap-3" aria-busy={isPending}>

@@ -7,6 +7,9 @@ import bcrypt from "bcryptjs";
 import prisma from "@/db";
 import { env } from "@/utils/env";
 
+/** How stale a token's cached role may get before it is re-read. */
+const ROLE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
 const providers: Provider[] = [
   Credentials({
     credentials: {
@@ -64,6 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id!;
         token.role = user.role;
+        token.roleCheckedAt = Date.now();
       }
 
       // Client-initiated refresh via useSession().update({ name }).
@@ -80,6 +84,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         typeof (session as { name?: unknown }).name === "string"
       ) {
         token.name = (session as { name: string }).name;
+      }
+
+      // Without this, `role` would only ever be read at sign-in: an admin
+      // promoting someone would leave them a USER in their own token for up to
+      // 30 days. Re-reading it at most every 5 minutes also drops the session
+      // of a user who has since been deleted.
+      //
+      // Safe to touch Prisma here because there is no middleware, so auth()
+      // only runs in Server Components and route handlers - never on the edge
+      // runtime. Cost is one primary-key lookup per user per 5 minutes.
+      if (
+        token.id &&
+        Date.now() - (token.roleCheckedAt ?? 0) > ROLE_REFRESH_INTERVAL_MS
+      ) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { role: true },
+        });
+
+        if (!fresh) return null;
+
+        token.role = fresh.role;
+        token.roleCheckedAt = Date.now();
       }
 
       return token;

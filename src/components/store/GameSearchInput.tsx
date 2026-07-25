@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useGameQueryParams } from "./useGameQueryParams";
+import { useListQueryParams } from "@/hooks/useListQueryParams";
 
 const DEBOUNCE_MS = 300;
 
@@ -13,7 +13,7 @@ const DEBOUNCE_MS = 300;
  * rendering.
  */
 export function GameSearchInput({ className }: { className?: string }) {
-  const { searchParams, apply, isPending } = useGameQueryParams();
+  const { searchParams, apply, isPending } = useListQueryParams("/games");
   const currentQuery = searchParams.get("q") ?? "";
   const [value, setValue] = useState(currentQuery);
 
