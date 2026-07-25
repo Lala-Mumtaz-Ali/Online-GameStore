@@ -3,6 +3,17 @@ import { expect, type Page, test } from "@playwright/test";
 const gameCards = 'a[href^="/games/"]';
 
 /**
+ * Search terms are pinned to the seeded catalogue, so they live here rather
+ * than being scattered through the specs - reseeding with a different set of
+ * games should only require editing these two lines.
+ *
+ * UNIQUE_TERM must match exactly one seeded title; SOME_TERM only has to match
+ * at least one.
+ */
+const UNIQUE_TERM = "witcher"; // -> The Witcher 3: Wild Hunt
+const SOME_TERM = "ass"; // -> Mass Effect Legendary Edition
+
+/**
  * Record every URL the page moves through, including client-side replaces that
  * leave no history entry. Used to prove a search settles on one URL instead of
  * oscillating.
@@ -40,19 +51,19 @@ test.describe("catalogue search and filtering", () => {
   }) => {
     await page.goto("/games");
 
-    await page.getByLabel("Search games").first().fill("ember");
+    await page.getByLabel("Search games").first().fill(UNIQUE_TERM);
 
     // The input is debounced by 300ms, so this waits rather than asserting
     // immediately. If the debounce regressed to navigating per keystroke, the
     // history assertion in the next test catches it.
-    await expect(page).toHaveURL(/[?&]q=ember/, { timeout: 5000 });
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${UNIQUE_TERM}`), { timeout: 5000 });
     await expect(page.locator(gameCards)).toHaveCount(1);
   });
 
   test("the debounce does not push one history entry per keystroke", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("Search games").first().fill("ronin");
-    await expect(page).toHaveURL(/\/games\?q=ronin/);
+    await page.getByLabel("Search games").first().fill(UNIQUE_TERM);
+    await expect(page).toHaveURL(new RegExp(`/games\\?q=${UNIQUE_TERM}`));
 
     // One entry for the whole search, so a single Back returns to the home page.
     await page.goBack();
@@ -75,30 +86,30 @@ test.describe("catalogue search and filtering", () => {
     await page.goto("/games");
     await recordUrlChanges(page);
 
-    await page.getByLabel("Search games").first().fill("ass");
-    await expect(page).toHaveURL(/[?&]q=ass/);
+    await page.getByLabel("Search games").first().fill(SOME_TERM);
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${SOME_TERM}`));
 
     // Well past the 300ms debounce: any feedback loop would have flipped by now.
     await page.waitForTimeout(2000);
 
-    expect(await readUrlLog(page)).toEqual(["/games", "/games?q=ass"]);
-    await expect(page).toHaveURL(/[?&]q=ass/);
+    expect(await readUrlLog(page)).toEqual(["/games", `/games?q=${SOME_TERM}`]);
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${SOME_TERM}`));
   });
 
   test("both search boxes end up showing the same text", async ({ page }) => {
     await page.goto("/games");
 
-    await page.getByLabel("Search games").first().fill("ember");
-    await expect(page).toHaveURL(/[?&]q=ember/);
+    await page.getByLabel("Search games").first().fill(UNIQUE_TERM);
+    await expect(page).toHaveURL(new RegExp(`[?&]q=${UNIQUE_TERM}`));
 
     const boxes = page.getByLabel("Search games");
     for (let i = 0; i < (await boxes.count()); i++) {
-      await expect(boxes.nth(i)).toHaveValue("ember");
+      await expect(boxes.nth(i)).toHaveValue(UNIQUE_TERM);
     }
   });
 
   test("Clear filters resets the search box, not just the URL", async ({ page }) => {
-    await page.goto("/games?q=ember");
+    await page.goto(`/games?q=${UNIQUE_TERM}`);
 
     await page.getByRole("link", { name: "Clear filters" }).first().click();
 
