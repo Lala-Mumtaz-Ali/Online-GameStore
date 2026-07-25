@@ -157,6 +157,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser — you shou
 | `npm run typecheck`     | `tsc --noEmit`                                                                  |
 | `npm run lint`          | ESLint                                                                          |
 | `npm run format`        | Prettier                                                                        |
+| `npm run db:seed`       | Fill a database with categories, the catalogue, and (optionally) an admin       |
+| `npm run verify:images` | Check that every game's cover art still resolves                                |
 
 **Unit tests mock Prisma rather than hitting a database.** The only database this project has is a
 remote Supabase instance holding live data, so a unit suite that connected to it would be slow,
@@ -238,6 +240,7 @@ This is a portfolio project, so a few things are intentionally simplified:
 - **No IP-level rate limiting.** Password reset requests are throttled per account in the database (3 per 15 minutes), which is correct across serverless instances. Limiting by IP belongs at the edge — Vercel WAF or Upstash — and is out of scope here. An in-memory limiter would be per-instance on serverless, i.e. no limit at all.
 - **Email verification isn't enforced at login.** It's advisory: unverified accounts can still sign in.
 - **Search isn't index-accelerated.** There are btree indexes on `title`, `price`, and `releaseDate`, but those only support the `ORDER BY` of each sort option. The search itself compiles to `ILIKE '%query%'`, and a leading wildcard can't use a btree — so it's a sequential scan. At real catalogue scale the fix is a `pg_trgm` GIN index (`CREATE INDEX ... USING gin (title gin_trgm_ops)`) or a full-text `tsvector` column with a trigger. Neither is implemented here: Prisma has no first-class support for either, and the catalogue is ~40 rows. Adding a GIN index at this size would be cargo cult.
+- **Cover art is hotlinked, not hosted.** The seeded catalogue uses real games, with covers pulled from Steam's public CDN by app id. Those images are publisher-owned and served from infrastructure this project doesn't control, so they can change or stop resolving — `npm run verify:images` checks all of them in one command. A production store would license its artwork and serve it from its own CDN.
 - **No mobile navigation.** The navbar has no hamburger menu, so the search box is hidden below the `sm` breakpoint (the `/games` page renders its own for small screens). A proper mobile nav is the next UI job.
 - **Simple pagination** — admin lists show 20 items per page, the storefront 24. Offset-based, which is fine at this scale; keyset pagination would be the move at much larger volumes.
 

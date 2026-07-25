@@ -10,408 +10,510 @@ const categories = [
   { name: "Strategy", slug: "strategy" },
 ];
 
-// Deliberately more than one page worth (the storefront shows 24 per page) with
-// a spread of prices and both past and future release dates, so pagination,
-// sorting, and the new/upcoming filters are all visibly exercised after seeding.
+/**
+ * Cover art is hotlinked from Steam's public CDN, keyed by Steam app id.
+ *
+ * `library_600x900` is the portrait store capsule, which suits the 3:4 card in
+ * GameCard far better than the landscape `header.jpg`.
+ *
+ * Two caveats worth stating plainly:
+ *  - These images are publisher-owned and served from infrastructure this
+ *    project does not control, so they can change or stop resolving. Run
+ *    `npx tsx scripts/verify-game-images.ts` to check them.
+ *  - Descriptions below are written for this project rather than copied from
+ *    any store listing.
+ */
+function cover(appId: number) {
+  return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/library_600x900.jpg`;
+}
+
 const games = [
+  // ---- Action -------------------------------------------------------------
   {
-    slug: "shadow-of-the-ronin",
-    title: "Shadow of the Ronin",
+    appId: 782330,
+    slug: "doom-eternal",
+    title: "DOOM Eternal",
     description:
-      "A fast-paced action game following a masterless samurai hunting the warlord who destroyed his clan.",
-    price: 59.99,
-    releaseDate: new Date("2025-11-10"),
-    imageUrl: null,
-    categories: ["action"],
-  },
-  {
-    slug: "ember-kingdom",
-    title: "Ember Kingdom",
-    description:
-      "An open-world RPG set in a realm slowly being consumed by magical wildfire.",
-    price: 49.99,
-    releaseDate: new Date("2024-03-15"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "tactics-of-aurelia",
-    title: "Tactics of Aurelia",
-    description:
-      "A turn-based strategy game of shifting alliances between five rival city-states.",
+      "A relentless first-person shooter built around aggression: resources come from finishing enemies, so retreating is rarely the answer.",
     price: 39.99,
-    releaseDate: new Date("2026-09-01"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "neon-vanguard",
-    title: "Neon Vanguard",
-    description:
-      "A cyberpunk action-shooter where every bullet ricochets off a hackable environment.",
-    price: 29.99,
-    releaseDate: new Date("2026-10-15"),
-    imageUrl: null,
+    releaseDate: new Date("2020-03-20"),
     categories: ["action"],
   },
   {
-    slug: "wanderers-requiem",
-    title: "Wanderer's Requiem",
+    appId: 814380,
+    slug: "sekiro-shadows-die-twice",
+    title: "Sekiro: Shadows Die Twice",
     description:
-      "A story-driven RPG about a travelling bard collecting the last songs of a dying world.",
-    price: 69.99,
-    releaseDate: new Date("2025-12-25"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "ironclad-empires",
-    title: "Ironclad Empires",
-    description:
-      "A grand strategy game of industrial-age empire building and naval warfare.",
-    price: 44.99,
-    releaseDate: new Date("2024-08-01"),
-    imageUrl: null,
-    categories: ["strategy", "action"],
-  },
-  {
-    slug: "starlight-vale",
-    title: "Starlight Vale",
-    description: "A cozy RPG about rebuilding a village of exiled star-mages.",
-    price: 34.99,
-    releaseDate: new Date("2026-11-20"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "crimson-siege",
-    title: "Crimson Siege",
-    description:
-      "A brutal action-strategy hybrid about defending the last free fortress on a fallen continent.",
-    price: 54.99,
-    releaseDate: new Date("2026-06-01"),
-    imageUrl: null,
-    categories: ["action", "strategy"],
-  },
-  {
-    slug: "aether-drift",
-    title: "Aether Drift",
-    description:
-      "A weightless combat racer through the shattered rings of a dead gas giant.",
-    price: 24.99,
-    releaseDate: new Date("2025-04-18"),
-    imageUrl: null,
-    categories: ["action"],
-  },
-  {
-    slug: "the-hollow-crown",
-    title: "The Hollow Crown",
-    description:
-      "A political RPG where every throne you claim costs you an ally you cannot replace.",
+      "A punishing action game about posture and timing, where deflecting a blow matters more than dodging it.",
     price: 59.99,
-    releaseDate: new Date("2025-02-28"),
-    imageUrl: null,
-    categories: ["rpg", "strategy"],
+    releaseDate: new Date("2019-03-22"),
+    categories: ["action"],
   },
   {
-    slug: "frostline-protocol",
-    title: "Frostline Protocol",
+    appId: 1145360,
+    slug: "hades",
+    title: "Hades",
     description:
-      "A tense survival strategy game about keeping a research colony alive through an endless winter.",
-    price: 34.99,
-    releaseDate: new Date("2024-11-05"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "vermillion-hunt",
-    title: "Vermillion Hunt",
-    description:
-      "A monster-hunting action game built around reading tells and punishing patience.",
-    price: 49.99,
-    releaseDate: new Date("2025-07-22"),
-    imageUrl: null,
+      "A roguelike about escaping the underworld, where every failed run advances the story rather than resetting it.",
+    price: 24.99,
+    releaseDate: new Date("2020-09-17"),
     categories: ["action", "rpg"],
   },
   {
-    slug: "saltmarsh-chronicle",
-    title: "Saltmarsh Chronicle",
+    appId: 601150,
+    slug: "devil-may-cry-5",
+    title: "Devil May Cry 5",
     description:
-      "A slow-burning RPG about a coastal town whose tide has stopped going out.",
+      "A stylish character-action game scored on how inventively you chain combos rather than how quickly you win.",
     price: 29.99,
-    releaseDate: new Date("2024-06-12"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "orbital-dominion",
-    title: "Orbital Dominion",
-    description:
-      "A 4X strategy game where the map is a solar system and the terrain is orbital mechanics.",
-    price: 44.99,
-    releaseDate: new Date("2026-08-14"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "blackpowder-creed",
-    title: "Blackpowder Creed",
-    description:
-      "A flintlock-era action game about a duellist working through a list of names.",
-    price: 39.99,
-    releaseDate: new Date("2025-09-30"),
-    imageUrl: null,
+    releaseDate: new Date("2019-03-08"),
     categories: ["action"],
   },
   {
-    slug: "lanterns-of-yuhai",
-    title: "Lanterns of Yuhai",
+    appId: 367520,
+    slug: "hollow-knight",
+    title: "Hollow Knight",
     description:
-      "An RPG about a festival that resurrects the dead for one night, and the girl who refuses to let it end.",
-    price: 54.99,
-    releaseDate: new Date("2026-12-05"),
-    imageUrl: null,
-    categories: ["rpg"],
+      "A hand-drawn metroidvania set in a ruined insect kingdom that explains almost nothing and rewards curiosity.",
+    price: 14.99,
+    releaseDate: new Date("2017-02-24"),
+    categories: ["action"],
   },
   {
-    slug: "steel-covenant",
-    title: "Steel Covenant",
+    appId: 504230,
+    slug: "celeste",
+    title: "Celeste",
     description:
-      "A mech-squad strategy game where every pilot who dies is gone for the rest of the campaign.",
-    price: 49.99,
-    releaseDate: new Date("2025-05-09"),
-    imageUrl: null,
-    categories: ["strategy", "action"],
-  },
-  {
-    slug: "duskfall-arena",
-    title: "Duskfall Arena",
-    description:
-      "A gladiatorial action game where the crowd's mood changes the rules mid-fight.",
+      "A precision platformer about climbing a mountain, with a story about anxiety that never lectures you.",
     price: 19.99,
-    releaseDate: new Date("2024-09-20"),
-    imageUrl: null,
+    releaseDate: new Date("2018-01-25"),
     categories: ["action"],
   },
   {
-    slug: "greenwarden",
-    title: "Greenwarden",
+    appId: 870780,
+    slug: "control-ultimate-edition",
+    title: "Control Ultimate Edition",
     description:
-      "A pastoral RPG about a druid rebuilding a forest that keeps growing back wrong.",
-    price: 27.99,
-    releaseDate: new Date("2026-07-30"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "cartel-of-thorns",
-    title: "Cartel of Thorns",
-    description:
-      "An economic strategy game about running a smuggling empire under a hostile crown.",
-    price: 32.99,
-    releaseDate: new Date("2025-01-17"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "midnight-cadence",
-    title: "Midnight Cadence",
-    description:
-      "A rhythm-action game where the soundtrack is generated by how recklessly you fight.",
-    price: 22.99,
-    releaseDate: new Date("2025-10-03"),
-    imageUrl: null,
+      "A supernatural shooter set in a government building that rearranges itself, with telekinesis as the main weapon.",
+    price: 39.99,
+    releaseDate: new Date("2019-08-27"),
     categories: ["action"],
   },
   {
-    slug: "the-long-inheritance",
-    title: "The Long Inheritance",
+    appId: 1237970,
+    slug: "titanfall-2",
+    title: "Titanfall 2",
     description:
-      "A generational RPG in which you play each heir of a cursed house in turn.",
-    price: 64.99,
-    releaseDate: new Date("2026-05-21"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "siege-of-varn",
-    title: "Siege of Varn",
-    description:
-      "A single-map strategy game about holding one mountain pass for forty in-game days.",
-    price: 18.99,
-    releaseDate: new Date("2024-04-02"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "rustborn",
-    title: "Rustborn",
-    description:
-      "A post-industrial action game about a scavenger welded into her own exosuit.",
-    price: 44.99,
-    releaseDate: new Date("2026-03-11"),
-    imageUrl: null,
+      "A movement-driven shooter whose campaign keeps inventing a new mechanic and discarding it a level later.",
+    price: 29.99,
+    releaseDate: new Date("2016-10-28"),
     categories: ["action"],
   },
   {
-    slug: "oath-of-the-pale-sun",
-    title: "Oath of the Pale Sun",
-    description: "A tactical RPG about a holy order that has quietly stopped believing.",
-    price: 52.99,
-    releaseDate: new Date("2025-08-08"),
-    imageUrl: null,
+    appId: 588650,
+    slug: "dead-cells",
+    title: "Dead Cells",
+    description:
+      "A fast roguelite where death is the main progression system and every weapon changes how you move.",
+    price: 24.99,
+    releaseDate: new Date("2018-08-07"),
+    categories: ["action"],
+  },
+  {
+    appId: 235460,
+    slug: "metal-gear-rising-revengeance",
+    title: "Metal Gear Rising: Revengeance",
+    description:
+      "An action game built around a free-aimed cutting mechanic that lets you slice almost anything apart.",
+    price: 19.99,
+    releaseDate: new Date("2014-01-09"),
+    categories: ["action"],
+  },
+  {
+    appId: 1139900,
+    slug: "ghostrunner",
+    title: "Ghostrunner",
+    description:
+      "A one-hit-kill cyberpunk platformer where every encounter is closer to a puzzle than a firefight.",
+    price: 29.99,
+    releaseDate: new Date("2020-10-27"),
+    categories: ["action"],
+  },
+  {
+    appId: 582010,
+    slug: "monster-hunter-world",
+    title: "Monster Hunter: World",
+    description:
+      "A hunting game about learning one creature's tells well enough to beat it with a weapon that takes hours to master.",
+    price: 29.99,
+    releaseDate: new Date("2018-08-09"),
+    categories: ["action", "rpg"],
+  },
+  {
+    appId: 2050650,
+    slug: "resident-evil-4",
+    title: "Resident Evil 4",
+    description:
+      "A remake of the survival-horror benchmark, rebuilt around resource pressure and a knife that can now break.",
+    price: 39.99,
+    releaseDate: new Date("2023-03-24"),
+    categories: ["action"],
+  },
+  {
+    appId: 1057090,
+    slug: "ori-and-the-will-of-the-wisps",
+    title: "Ori and the Will of the Wisps",
+    description:
+      "A painterly platformer with tight movement and a soundtrack doing as much narrative work as the script.",
+    price: 29.99,
+    releaseDate: new Date("2020-03-11"),
+    categories: ["action"],
+  },
+
+  // ---- RPG ----------------------------------------------------------------
+  {
+    appId: 292030,
+    slug: "the-witcher-3-wild-hunt",
+    title: "The Witcher 3: Wild Hunt",
+    description:
+      "An open-world RPG whose side quests are frequently better written than most games' main stories.",
+    price: 39.99,
+    releaseDate: new Date("2015-05-18"),
+    categories: ["rpg", "action"],
+  },
+  {
+    appId: 1245620,
+    slug: "elden-ring",
+    title: "ELDEN RING",
+    description:
+      "An open-world action RPG that marks nothing on your map and trusts you to go and find out.",
+    price: 59.99,
+    releaseDate: new Date("2022-02-25"),
+    categories: ["rpg", "action"],
+  },
+  {
+    appId: 1086940,
+    slug: "baldurs-gate-3",
+    title: "Baldur's Gate 3",
+    description:
+      "A tabletop-faithful RPG that will let almost any plan work, including the ones it clearly did not expect.",
+    price: 59.99,
+    releaseDate: new Date("2023-08-03"),
     categories: ["rpg", "strategy"],
   },
   {
-    slug: "tidebreaker",
-    title: "Tidebreaker",
+    appId: 435150,
+    slug: "divinity-original-sin-2",
+    title: "Divinity: Original Sin 2",
     description:
-      "A naval action game set during the collapse of a maritime trade federation.",
-    price: 37.99,
-    releaseDate: new Date("2024-12-01"),
-    imageUrl: null,
-    categories: ["action", "strategy"],
+      "A turn-based RPG with elemental surfaces that interact, so most fights can be won by rearranging the terrain.",
+    price: 44.99,
+    releaseDate: new Date("2017-09-14"),
+    categories: ["rpg", "strategy"],
   },
   {
-    slug: "glasswright",
-    title: "Glasswright",
+    appId: 632470,
+    slug: "disco-elysium",
+    title: "Disco Elysium",
     description:
-      "A puzzle-RPG about an artisan who repairs memories the way she repairs windows.",
-    price: 21.99,
-    releaseDate: new Date("2026-02-14"),
-    imageUrl: null,
+      "A detective RPG with no combat, where the skills you invest in argue with you about what happened.",
+    price: 39.99,
+    releaseDate: new Date("2019-10-15"),
     categories: ["rpg"],
   },
   {
-    slug: "province-of-ash",
-    title: "Province of Ash",
+    appId: 1091500,
+    slug: "cyberpunk-2077",
+    title: "Cyberpunk 2077",
     description:
-      "A reconstruction strategy game about governing a region after the war you started.",
-    price: 41.99,
-    releaseDate: new Date("2025-03-27"),
-    imageUrl: null,
-    categories: ["strategy"],
+      "A first-person RPG in a dense future city, built around augmentations that reshape how you approach a job.",
+    price: 49.99,
+    releaseDate: new Date("2020-12-10"),
+    categories: ["rpg", "action"],
   },
   {
-    slug: "hellion-run",
-    title: "Hellion Run",
+    appId: 489830,
+    slug: "the-elder-scrolls-v-skyrim-special-edition",
+    title: "The Elder Scrolls V: Skyrim Special Edition",
     description:
-      "A roguelite action game where every death rewrites one rule of the dungeon.",
-    price: 16.99,
-    releaseDate: new Date("2024-07-19"),
-    imageUrl: null,
-    categories: ["action"],
-  },
-  {
-    slug: "the-cartographers-debt",
-    title: "The Cartographer's Debt",
-    description:
-      "An exploration RPG about mapping a continent that is being erased behind you.",
-    price: 46.99,
-    releaseDate: new Date("2026-04-09"),
-    imageUrl: null,
+      "The open-world RPG that most people describe by the detour they took rather than the plot.",
+    price: 39.99,
+    releaseDate: new Date("2016-10-28"),
     categories: ["rpg"],
   },
   {
-    slug: "clockwork-dominion",
-    title: "Clockwork Dominion",
+    appId: 377160,
+    slug: "fallout-4",
+    title: "Fallout 4",
     description:
-      "A strategy game of automated armies where you program doctrine rather than issue orders.",
-    price: 38.99,
-    releaseDate: new Date("2025-06-16"),
-    imageUrl: null,
-    categories: ["strategy"],
-  },
-  {
-    slug: "ashen-veil",
-    title: "Ashen Veil",
-    description:
-      "A stealth-action game set in a city where the fog remembers where you have been.",
-    price: 33.99,
-    releaseDate: new Date("2024-10-24"),
-    imageUrl: null,
-    categories: ["action"],
-  },
-  {
-    slug: "song-of-the-drowned",
-    title: "Song of the Drowned",
-    description:
-      "An underwater RPG about a diver bargaining with the things that took her crew.",
-    price: 57.99,
-    releaseDate: new Date("2026-01-23"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "banner-and-bone",
-    title: "Banner and Bone",
-    description:
-      "A medieval strategy game where morale, not numbers, decides every battle.",
+      "A post-apocalyptic RPG that quietly becomes a settlement-building game if you let it.",
     price: 29.99,
-    releaseDate: new Date("2025-11-27"),
-    imageUrl: null,
-    categories: ["strategy"],
+    releaseDate: new Date("2015-11-10"),
+    categories: ["rpg", "action"],
   },
   {
-    slug: "voidlark",
-    title: "Voidlark",
+    appId: 374320,
+    slug: "dark-souls-iii",
+    title: "DARK SOULS III",
     description:
-      "A zero-gravity action game about a courier outrunning three separate governments.",
-    price: 26.99,
-    releaseDate: new Date("2024-05-30"),
-    imageUrl: null,
-    categories: ["action"],
+      "An action RPG about pattern recognition, with level design that keeps folding back on itself.",
+    price: 59.99,
+    releaseDate: new Date("2016-04-11"),
+    categories: ["rpg", "action"],
   },
   {
-    slug: "quiet-harvest",
-    title: "Quiet Harvest",
+    appId: 524220,
+    slug: "nier-automata",
+    title: "NieR:Automata",
     description:
-      "A pastoral RPG about a farming village that has not aged in sixty years.",
-    price: 23.99,
-    releaseDate: new Date("2026-09-18"),
-    imageUrl: null,
+      "An action RPG that changes genre between chapters and expects you to finish it more than once.",
+    price: 39.99,
+    releaseDate: new Date("2017-03-17"),
+    categories: ["rpg", "action"],
+  },
+  {
+    appId: 1687950,
+    slug: "persona-5-royal",
+    title: "Persona 5 Royal",
+    description:
+      "A turn-based RPG split between dungeon crawling and a calendar where your free time is the real resource.",
+    price: 59.99,
+    releaseDate: new Date("2022-10-21"),
     categories: ["rpg"],
   },
   {
-    slug: "thronefall-doctrine",
-    title: "Thronefall Doctrine",
+    appId: 379430,
+    slug: "kingdom-come-deliverance",
+    title: "Kingdom Come: Deliverance",
     description:
-      "A succession strategy game in which your heirs inherit your enemies as well as your lands.",
-    price: 47.99,
-    releaseDate: new Date("2025-09-04"),
-    imageUrl: null,
+      "A historical RPG with no magic, where your character is genuinely bad at everything until trained.",
+    price: 29.99,
+    releaseDate: new Date("2018-02-13"),
+    categories: ["rpg"],
+  },
+  {
+    appId: 1328670,
+    slug: "mass-effect-legendary-edition",
+    title: "Mass Effect Legendary Edition",
+    description:
+      "Three remastered science-fiction RPGs in which decisions carry forward across the whole trilogy.",
+    price: 59.99,
+    releaseDate: new Date("2021-05-14"),
+    categories: ["rpg", "action"],
+  },
+
+  // ---- Strategy -----------------------------------------------------------
+  {
+    appId: 289070,
+    slug: "sid-meiers-civilization-vi",
+    title: "Sid Meier's Civilization VI",
+    description:
+      "A turn-based 4X where cities spread across tiles, so where you build matters as much as what.",
+    price: 59.99,
+    releaseDate: new Date("2016-10-21"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 1142710,
+    slug: "total-war-warhammer-iii",
+    title: "Total War: WARHAMMER III",
+    description:
+      "A campaign map paired with real-time battles, where each faction plays by noticeably different rules.",
+    price: 59.99,
+    releaseDate: new Date("2022-02-17"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 1466860,
+    slug: "age-of-empires-iv",
+    title: "Age of Empires IV",
+    description:
+      "A real-time strategy game about ages, walls, and getting your economy up before the first raid lands.",
+    price: 59.99,
+    releaseDate: new Date("2021-10-28"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 268500,
+    slug: "xcom-2",
+    title: "XCOM 2",
+    description:
+      "Turn-based tactics where the campaign is a resource crisis and every soldier you lose stays lost.",
+    price: 59.99,
+    releaseDate: new Date("2016-02-05"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 281990,
+    slug: "stellaris",
+    title: "Stellaris",
+    description:
+      "A grand strategy game about governing a galactic empire, where the early exploration is the best part.",
+    price: 39.99,
+    releaseDate: new Date("2016-05-09"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 1158310,
+    slug: "crusader-kings-iii",
+    title: "Crusader Kings III",
+    description:
+      "A grand strategy game played as a dynasty, where inheritance law causes more wars than ambition.",
+    price: 49.99,
+    releaseDate: new Date("2020-09-01"),
     categories: ["strategy", "rpg"],
   },
   {
-    slug: "gunmetal-liturgy",
-    title: "Gunmetal Liturgy",
+    appId: 394360,
+    slug: "hearts-of-iron-iv",
+    title: "Hearts of Iron IV",
     description:
-      "An action game about a lapsed war-priest whose weapons still expect prayers.",
-    price: 42.99,
-    releaseDate: new Date("2026-11-06"),
-    imageUrl: null,
-    categories: ["action"],
-  },
-  {
-    slug: "the-amber-court",
-    title: "The Amber Court",
-    description: "A courtly intrigue RPG where the only combat system is conversation.",
-    price: 36.99,
-    releaseDate: new Date("2024-02-08"),
-    imageUrl: null,
-    categories: ["rpg"],
-  },
-  {
-    slug: "last-light-outpost",
-    title: "Last Light Outpost",
-    description:
-      "A defensive strategy game about rationing power between walls, lights, and heat.",
-    price: 25.99,
-    releaseDate: new Date("2025-12-11"),
-    imageUrl: null,
+      "A wargame where production lines and supply reach decide far more battles than tactics do.",
+    price: 49.99,
+    releaseDate: new Date("2016-06-06"),
     categories: ["strategy"],
   },
+  {
+    appId: 323190,
+    slug: "frostpunk",
+    title: "Frostpunk",
+    description:
+      "A city builder about rationing heat and dignity, where every law you pass costs something.",
+    price: 29.99,
+    releaseDate: new Date("2018-04-24"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 590380,
+    slug: "into-the-breach",
+    title: "Into the Breach",
+    description:
+      "Turn-based tactics with perfect information: you always know what the enemy will do, and it is still hard.",
+    price: 14.99,
+    releaseDate: new Date("2018-02-27"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 294100,
+    slug: "rimworld",
+    title: "RimWorld",
+    description:
+      "A colony simulator whose story generator is genuinely better at drama than most scripted campaigns.",
+    price: 34.99,
+    releaseDate: new Date("2018-10-17"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 427520,
+    slug: "factorio",
+    title: "Factorio",
+    description:
+      "A factory-building game about turning a working system into a faster one, forever.",
+    price: 35.0,
+    releaseDate: new Date("2020-08-14"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 255710,
+    slug: "cities-skylines",
+    title: "Cities: Skylines",
+    description:
+      "A city builder where traffic is the real antagonist and zoning is the only weapon.",
+    price: 29.99,
+    releaseDate: new Date("2015-03-10"),
+    categories: ["strategy"],
+  },
+  {
+    appId: 261550,
+    slug: "mount-and-blade-ii-bannerlord",
+    title: "Mount & Blade II: Bannerlord",
+    description:
+      "A medieval sandbox that starts with one horse and ends with a claim to a kingdom.",
+    price: 49.99,
+    releaseDate: new Date("2022-10-25"),
+    categories: ["strategy", "rpg"],
+  },
 ];
+
+/**
+ * The catalogue previously seeded 40 invented titles, which had no real cover
+ * art to attach. They are removed here so the store does not end up holding
+ * both sets.
+ *
+ * Anything a customer has actually bought or preordered is kept: deleting it
+ * would null out OrderItem.gameId and silently drop the game from that
+ * customer's library. Those are reported instead of removed.
+ */
+const LEGACY_PLACEHOLDER_SLUGS = [
+  "shadow-of-the-ronin",
+  "ember-kingdom",
+  "tactics-of-aurelia",
+  "neon-vanguard",
+  "wanderers-requiem",
+  "ironclad-empires",
+  "starlight-vale",
+  "crimson-siege",
+  "aether-drift",
+  "the-hollow-crown",
+  "frostline-protocol",
+  "vermillion-hunt",
+  "saltmarsh-chronicle",
+  "orbital-dominion",
+  "blackpowder-creed",
+  "lanterns-of-yuhai",
+  "steel-covenant",
+  "duskfall-arena",
+  "greenwarden",
+  "cartel-of-thorns",
+  "midnight-cadence",
+  "the-long-inheritance",
+  "siege-of-varn",
+  "rustborn",
+  "oath-of-the-pale-sun",
+  "tidebreaker",
+  "glasswright",
+  "province-of-ash",
+  "hellion-run",
+  "the-cartographers-debt",
+  "clockwork-dominion",
+  "ashen-veil",
+  "song-of-the-drowned",
+  "banner-and-bone",
+  "voidlark",
+  "quiet-harvest",
+  "thronefall-doctrine",
+  "gunmetal-liturgy",
+  "the-amber-court",
+  "last-light-outpost",
+];
+
+async function removeLegacyPlaceholders() {
+  const legacy = await prisma.game.findMany({
+    where: { slug: { in: LEGACY_PLACEHOLDER_SLUGS } },
+    select: {
+      id: true,
+      slug: true,
+      _count: { select: { orderItems: true, preorders: true } },
+    },
+  });
+
+  if (legacy.length === 0) return;
+
+  const owned = legacy.filter((g) => g._count.orderItems > 0 || g._count.preorders > 0);
+  const removable = legacy.filter((g) => !owned.includes(g));
+
+  if (removable.length > 0) {
+    await prisma.game.deleteMany({ where: { id: { in: removable.map((g) => g.id) } } });
+    console.log(`Removed ${removable.length} placeholder game(s).`);
+  }
+
+  if (owned.length > 0) {
+    console.log(
+      `Kept ${owned.length} placeholder game(s) that customers already own or preordered:`
+    );
+    for (const game of owned) console.log(`  ${game.slug}`);
+  }
+}
 
 async function seedAdmin() {
   const email = process.env.SEED_ADMIN_EMAIL;
@@ -451,21 +553,25 @@ async function main() {
     });
   }
 
-  for (const { categories: categorySlugs, ...data } of games) {
+  for (const { categories: categorySlugs, appId, ...data } of games) {
+    const imageUrl = cover(appId);
+
     await prisma.game.upsert({
       where: { slug: data.slug },
-      update: {},
+      // Only the cover is refreshed on re-runs, so prices and descriptions
+      // edited in the admin dashboard are not silently reverted.
+      update: { imageUrl },
       create: {
         ...data,
-        categories: {
-          connect: categorySlugs.map((slug) => ({ slug })),
-        },
+        imageUrl,
+        categories: { connect: categorySlugs.map((slug) => ({ slug })) },
       },
     });
   }
 
   console.log(`Seeded ${categories.length} categories and ${games.length} games.`);
 
+  await removeLegacyPlaceholders();
   await seedAdmin();
 }
 
