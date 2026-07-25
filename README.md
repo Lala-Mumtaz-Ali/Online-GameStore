@@ -52,6 +52,8 @@ Scheduled jobs (called "cron jobs") run in the background to:
 | **[Resend](https://resend.com)** | An email service | Sending real emails: verification links, order confirmations, weekly reports |
 | **[Recharts](https://recharts.org)** | A charting library | Drawing the graphs on the admin analytics dashboard |
 | **[Vercel](https://vercel.com)** | A hosting platform | Running the deployed app and triggering the scheduled background jobs |
+| **[Vitest](https://vitest.dev)** | A unit-test runner | Testing pure logic — pagination math, date bucketing, email escaping, auth guards |
+| **[Playwright](https://playwright.dev)** | A browser-automation test tool | End-to-end tests that drive a real browser against a real build |
 
 ---
 
@@ -79,13 +81,65 @@ npx prisma migrate deploy
 
 > **Troubleshooting:** on some machines `prisma migrate dev` hangs indefinitely (an issue with Prisma's schema-engine binary). If that happens to you, generate the SQL manually with `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script`, run it directly against your database (`DIRECT_URL`), and record it in the `_prisma_migrations` table. The files in `prisma/migrations/` contain the exact SQL for this schema.
 
-**4. Start the app**
+**4. Seed the database**
+
+```bash
+npm run db:seed
+```
+
+This creates the categories and the game catalogue. If you also set `SEED_ADMIN_EMAIL` and
+`SEED_ADMIN_PASSWORD` in your `.env`, it creates an admin account so you can open `/admin` —
+otherwise it skips that step and tells you so. There is deliberately **no default admin password**:
+a hardcoded credential in a public repo becomes a real vulnerability the moment someone deploys it.
+
+**5. Start the app**
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser — you should see the storefront. 🎉
+
+---
+
+## 🧪 Tests
+
+| Command | What it does |
+|---|---|
+| `npm test` | Unit tests ([Vitest](https://vitest.dev)) — pure logic, no network, no database |
+| `npm run test:watch` | The same suite in watch mode |
+| `npm run test:coverage` | Unit tests with a V8 coverage report |
+| `npm run test:e2e` | End-to-end browser tests ([Playwright](https://playwright.dev)) |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+
+**Unit tests mock Prisma rather than hitting a database.** The only database this project has is a
+remote Supabase instance holding live data, so a unit suite that connected to it would be slow,
+non-deterministic, and destructive. Instead the suite targets logic that is genuinely worth pinning:
+pagination and URL-building math, date bucketing for the analytics charts, HTML escaping in outbound
+email, and the authorization guards.
+
+One of those tests is the architectural one: it asserts that calling `deleteGame()` as a non-admin
+rejects **and never reaches Prisma** — an executable proof that authorization lives in the data layer,
+not in the pages that happen to call it.
+
+**End-to-end tests run against a real database and a real production build.** In CI they get a
+disposable Postgres service container, which is migrated and seeded from scratch on every run. To run
+them locally you need a database you are willing to write to:
+
+```bash
+npm run build
+npm run db:seed
+npm run test:e2e
+```
+
+> ⚠️ Never point the E2E suite at your production database — it registers accounts and writes data.
+
+A pre-commit hook runs `typecheck`, `lint`, and the unit tests. Playwright deliberately stays out of
+that hook: a hook slow enough to be annoying just gets bypassed with `--no-verify`.
+
+Both suites also run in GitHub Actions on every push and pull request (`.github/workflows/ci.yml`).
 
 ---
 
@@ -101,12 +155,15 @@ src/
 ├── actions/        # Server Actions — functions the frontend calls to change data
 ├── components/     # Reusable UI pieces (buttons, cards, navbar, etc.)
 ├── data/           # Data-access layer — the ONLY place that talks to the database
-├── lib/            # Shared helpers (email templates, utilities)
+├── lib/            # Shared helpers (email templates, pagination, date series)
 ├── services/       # Business logic (e.g., what happens during checkout)
+├── test/           # Test doubles (the Prisma mock, the server-only stub)
 └── auth.ts         # NextAuth configuration
 prisma/
 ├── schema.prisma   # The database blueprint: every table and its columns
+├── seed.ts         # Fills a fresh database with categories, games, and an admin
 └── migrations/     # SQL files that build the database step by step
+e2e/                # Playwright end-to-end specs
 ```
 
 A few design decisions worth knowing about:

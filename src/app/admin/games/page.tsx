@@ -3,6 +3,7 @@ import { getPaginatedGames } from "@/data/games";
 import { Button } from "@/components/ui/button";
 import { deleteGameAction } from "./actions";
 import { Pagination } from "@/components/admin/Pagination";
+import { getTotalPages, parsePageParam } from "@/lib/pagination";
 
 const PAGE_SIZE = 20;
 
@@ -12,12 +13,12 @@ export default async function AdminGamesPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
+  const page = parsePageParam(pageParam);
   const { games, totalCount } = await getPaginatedGames({
     page,
     pageSize: PAGE_SIZE,
   });
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const totalPages = getTotalPages(totalCount, PAGE_SIZE);
 
   return (
     <div>

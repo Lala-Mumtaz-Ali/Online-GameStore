@@ -1,1 +1,4 @@
-npx tsc --noEmit && npm run lint
+# Unit tests only. They are pure (no network, no database) and run in well under
+# a second, so they belong here. Playwright stays in CI: a hook slow enough to be
+# annoying just gets bypassed with --no-verify.
+npm run typecheck && npm run lint && npm run test

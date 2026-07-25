@@ -1,35 +1,7 @@
 import "server-only";
 import prisma from "@/db";
 import { requireAdmin } from "@/data/admin";
-
-function dateKey(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function buildDailySeries<T>(
-  days: number,
-  rows: { createdAt: Date }[],
-  bucket: (acc: Map<string, T>, key: string, row: { createdAt: Date }) => void,
-  empty: T
-) {
-  const buckets = new Map<string, T>();
-  const today = new Date();
-
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setUTCDate(d.getUTCDate() - i);
-    buckets.set(dateKey(d), empty);
-  }
-
-  for (const row of rows) {
-    const key = dateKey(row.createdAt);
-    if (buckets.has(key)) {
-      bucket(buckets, key, row);
-    }
-  }
-
-  return Array.from(buckets.entries()).map(([date, value]) => ({ date, ...value }));
-}
+import { buildDailySeries } from "@/lib/dateSeries";
 
 export async function getKpiSummary() {
   await requireAdmin();
