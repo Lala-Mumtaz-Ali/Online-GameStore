@@ -1,5 +1,5 @@
 import { getAllOrders } from "@/data/orders";
-import { Pagination } from "@/components/admin/Pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { getTotalPages, parsePageParam } from "@/lib/pagination";
 
 const PAGE_SIZE = 20;
@@ -9,8 +9,8 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
-  const page = parsePageParam(pageParam);
+  const sp = await searchParams;
+  const page = parsePageParam(sp.page);
   const { orders, totalCount } = await getAllOrders({ page, pageSize: PAGE_SIZE });
   const totalPages = getTotalPages(totalCount, PAGE_SIZE);
 
@@ -49,7 +49,12 @@ export default async function AdminOrdersPage({
         </table>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} basePath="/admin/orders" />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        basePath="/admin/orders"
+        searchParams={sp}
+      />
     </div>
   );
 }

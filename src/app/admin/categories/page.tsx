@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPaginatedCategories } from "@/data/games";
 import { Button } from "@/components/ui/button";
 import { deleteCategoryAction } from "./actions";
-import { Pagination } from "@/components/admin/Pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { getTotalPages, parsePageParam } from "@/lib/pagination";
 
 const PAGE_SIZE = 20;
@@ -12,8 +12,8 @@ export default async function AdminCategoriesPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
-  const page = parsePageParam(pageParam);
+  const sp = await searchParams;
+  const page = parsePageParam(sp.page);
   const { categories, totalCount } = await getPaginatedCategories({
     page,
     pageSize: PAGE_SIZE,
@@ -74,7 +74,12 @@ export default async function AdminCategoriesPage({
         </table>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} basePath="/admin/categories" />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        basePath="/admin/categories"
+        searchParams={sp}
+      />
     </div>
   );
 }

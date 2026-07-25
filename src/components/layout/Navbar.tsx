@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { auth, signOut } from "@/auth";
+import { GameSearchInput } from "@/components/store/GameSearchInput";
 import { Button } from "@/components/ui/button";
 import { getCartCount } from "@/data/cart";
 import {
@@ -21,6 +23,13 @@ export async function Navbar() {
         <Link href="/" className="font-bold text-xl mr-6">
           GameStore
         </Link>
+        {/* Hidden below sm: there is no mobile menu yet, so every nav link
+            renders at every width and an always-visible search box would
+            overflow the bar. /games renders its own search input for small screens.
+            Suspense is required because GameSearchInput reads useSearchParams. */}
+        <Suspense fallback={<div className="mr-4 hidden h-9 w-full max-w-xs sm:block" />}>
+          <GameSearchInput className="mr-4 hidden w-full max-w-xs sm:block" />
+        </Suspense>
         <div className="ml-auto flex items-center space-x-4">
           <Link href="/games" className="text-sm font-medium hover:underline">
             Games

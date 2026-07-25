@@ -16,6 +16,7 @@ This is a **full-stack** project, which means it includes both:
 ### As a regular user
 
 - **Browse the storefront** — explore games by genre, see what's new, upcoming, or top-selling, and open a detail page for each game.
+- **Search and filter the catalogue** — search by title from the navbar, filter by genre, and sort by title, price, or release date. Everything lives in the URL, so any view is shareable and bookmarkable.
 - **Create an account** — sign up with email + password (with email verification) or sign in with Google.
 - **Reset a forgotten password** — request a link by email, then set a new password. Links are single-use and expire after an hour.
 - **Shop** — add games to a cart and check out. Payment is _simulated_ (clearly labeled — no real payment is processed), so you can test the full buying flow safely.
@@ -215,6 +216,9 @@ A few design decisions worth knowing about:
 - **Emails escape user input** before inserting it into HTML, preventing injection attacks.
 - **Password reset tokens live in their own table, hashed.** They deliberately do _not_ reuse NextAuth's `VerificationToken`: that table is looked up by token value with no purpose check, so a reset token pasted into `/verify-email?token=…` would have verified the account's email address instead. Cross-purpose token confusion is a real vulnerability class, so the two token spaces are kept disjoint. Only a SHA-256 of each token is stored, so a leaked database backup can't be used to take over accounts.
 - **The forgot-password form never reveals whether an account exists.** It reports the same message either way, including when the per-account throttle (3 requests per 15 minutes) silently drops the request.
+- **Catalogue state lives in the URL, not in React state.** `/games?q=…&genre=…&sort=…&page=…` is the single source of truth, so the server renders the exact view you're looking at, the back button works, and links are shareable. Only the search box and the two filter selects are client components; everything else stays a Server Component.
+- **The sort parameter is a whitelist, never a raw string.** `?sort=` is parsed through a Zod enum into a lookup map, so a hand-edited URL can't reach `orderBy`. Same for the genre slug, which must match a slug-shaped pattern. Bad values fall back to defaults rather than erroring — a public page shouldn't 500 because someone typed in the address bar.
+- **Pagination orders by a unique tiebreaker.** Sorting by price alone means rows with equal prices have no defined order, so OFFSET paging can show the same game twice or skip one entirely. Every catalogue query ends with `{ id: "asc" }`. The `count()` also always uses the exact same `where` as the `findMany()`.
 
 ---
 
@@ -226,7 +230,9 @@ This is a portfolio project, so a few things are intentionally simplified:
 - **Sessions can't be revoked on password reset.** Sessions are JWTs with no server-side session table, so a reset changes the password but does not sign out devices that are already logged in. Fixing it properly means either a `passwordChangedAt` column checked on every request (a database read on the auth path) or switching to database sessions. Both are real trade-offs rather than oversights, so this is documented instead of half-implemented.
 - **No IP-level rate limiting.** Password reset requests are throttled per account in the database (3 per 15 minutes), which is correct across serverless instances. Limiting by IP belongs at the edge — Vercel WAF or Upstash — and is out of scope here. An in-memory limiter would be per-instance on serverless, i.e. no limit at all.
 - **Email verification isn't enforced at login.** It's advisory: unverified accounts can still sign in.
-- **Simple pagination** — admin lists show 20 items per page, which is fine at this scale.
+- **Search isn't index-accelerated.** There are btree indexes on `title`, `price`, and `releaseDate`, but those only support the `ORDER BY` of each sort option. The search itself compiles to `ILIKE '%query%'`, and a leading wildcard can't use a btree — so it's a sequential scan. At real catalogue scale the fix is a `pg_trgm` GIN index (`CREATE INDEX ... USING gin (title gin_trgm_ops)`) or a full-text `tsvector` column with a trigger. Neither is implemented here: Prisma has no first-class support for either, and the catalogue is ~40 rows. Adding a GIN index at this size would be cargo cult.
+- **No mobile navigation.** The navbar has no hamburger menu, so the search box is hidden below the `sm` breakpoint (the `/games` page renders its own for small screens). A proper mobile nav is the next UI job.
+- **Simple pagination** — admin lists show 20 items per page, the storefront 24. Offset-based, which is fine at this scale; keyset pagination would be the move at much larger volumes.
 
 ---
 

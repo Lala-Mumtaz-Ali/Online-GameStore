@@ -53,6 +53,9 @@ model User {
   notifyRequests ReleaseNotifyRequest[]
   notifications Notification[]
   passwordResetTokens PasswordResetToken[]
+
+  // Supports the admin user list's default ordering (newest signups first).
+  @@index([createdAt])
 }
 
 // Deliberately NOT reusing VerificationToken for password resets.
@@ -113,6 +116,14 @@ model Game {
   orderItems            OrderItem[]
   preorders             Preorder[]
   notifyRequests        ReleaseNotifyRequest[]
+
+  // One index per storefront sort option. These accelerate the ORDER BY only.
+  // They do NOT speed up the search itself: `contains` compiles to ILIKE '%q%',
+  // and a leading wildcard cannot use a btree. See the README for why pg_trgm
+  // is the right fix at real scale and why it is not implemented here.
+  @@index([title])
+  @@index([price])
+  @@index([releaseDate])
 }
 
 model Category {

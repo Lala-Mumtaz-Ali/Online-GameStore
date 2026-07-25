@@ -1,6 +1,9 @@
 import "server-only";
+import type { Prisma } from "@prisma/client";
 import prisma from "@/db";
 import { requireAdmin } from "@/data/admin";
+import { getSkip } from "@/lib/pagination";
+import type { GameSort } from "@/lib/gameQuery";
 
 export type GameInput = {
   slug: string;
@@ -17,8 +20,65 @@ export type CategoryInput = {
   slug: string;
 };
 
-export function getAllGames() {
-  return prisma.game.findMany({ orderBy: { title: "asc" } });
+/** Exactly the fields GameCard renders, plus id for the "owned" lookup. */
+export type StoreGameListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  price: number;
+  imageUrl: string | null;
+};
+
+const GAME_ORDER_BY: Record<GameSort, Prisma.GameOrderByWithRelationInput> = {
+  title: { title: "asc" },
+  "price-asc": { price: "asc" },
+  "price-desc": { price: "desc" },
+  newest: { releaseDate: "desc" },
+};
+
+/**
+ * The public catalogue query: search, genre filter, sort, pagination.
+ *
+ * Intentionally unguarded, like getAllCategories(). getPaginatedGames() below
+ * calls requireAdmin() and so cannot be reused for the storefront.
+ */
+export async function searchGames({
+  page = 1,
+  pageSize = 24,
+  q,
+  genreSlug,
+  sort = "title",
+}: {
+  page?: number;
+  pageSize?: number;
+  q?: string;
+  genreSlug?: string;
+  sort?: GameSort;
+} = {}): Promise<{ games: StoreGameListItem[]; totalCount: number }> {
+  // Built once and handed to BOTH queries below. Filtering findMany but not
+  // count is the classic pagination bug: "Page 1 of 47" with three results.
+  const where: Prisma.GameWhereInput = {
+    // Title only. `contains` on description would scan a long text column for
+    // little precision - every action game's description contains "action".
+    ...(q ? { title: { contains: q, mode: "insensitive" } } : {}),
+    ...(genreSlug ? { categories: { some: { slug: genreSlug } } } : {}),
+  };
+
+  const [games, totalCount] = await Promise.all([
+    prisma.game.findMany({
+      where,
+      // The id tiebreaker makes OFFSET pagination stable. Without a unique
+      // secondary key, rows with equal price (or equal release date) can be
+      // returned twice or skipped entirely as you page through.
+      orderBy: [GAME_ORDER_BY[sort], { id: "asc" }],
+      select: { id: true, slug: true, title: true, price: true, imageUrl: true },
+      skip: getSkip(page, pageSize),
+      take: pageSize,
+    }),
+    prisma.game.count({ where }),
+  ]);
+
+  return { games, totalCount };
 }
 
 export async function getPaginatedGames({
@@ -30,7 +90,7 @@ export async function getPaginatedGames({
 } = {}) {
   await requireAdmin();
 
-  const skip = Math.max(0, (page - 1) * pageSize);
+  const skip = getSkip(page, pageSize);
 
   const [games, totalCount] = await Promise.all([
     prisma.game.findMany({
@@ -64,7 +124,7 @@ export async function getPaginatedCategories({
 } = {}) {
   await requireAdmin();
 
-  const skip = Math.max(0, (page - 1) * pageSize);
+  const skip = getSkip(page, pageSize);
 
   const [categories, totalCount] = await Promise.all([
     prisma.category.findMany({
@@ -79,10 +139,15 @@ export async function getPaginatedCategories({
   return { categories, totalCount };
 }
 
-export function getCategoryWithGames(slug: string) {
+/**
+ * Replaces getCategoryWithGames, which eagerly loaded every game in a genre.
+ * /genre/[slug] now only needs to know the category exists before redirecting
+ * to the paginated catalogue.
+ */
+export function getCategoryBySlug(slug: string) {
   return prisma.category.findUnique({
     where: { slug },
-    include: { games: { orderBy: { title: "asc" } } },
+    select: { id: true, name: true, slug: true },
   });
 }
 
