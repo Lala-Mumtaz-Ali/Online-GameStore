@@ -15,8 +15,9 @@ This is a **full-stack** project, which means it includes both:
 
 ### As a regular user
 
-- **Browse the storefront** — explore games by genre, see what's new, upcoming, or top-selling, and open a detail page for each game.
+- **Browse the storefront** — explore ~120 real games across 12 genres, see what's new, upcoming, or top-selling, and open a detail page for each game.
 - **Search and filter the catalogue** — search by title from the navbar, filter by genre, and sort by title, price, or release date. Everything lives in the URL, so any view is shareable and bookmarkable.
+- **Read a proper store page** — each game has cover art, developer and publisher, Metacritic score, review count, supported platforms, playable **trailers**, a **screenshot gallery** with a lightbox, the full store description, and feature tags (Single-player, Co-op, Controller support…).
 - **Create an account** — sign up with email + password (with email verification) or sign in with Google.
 - **Reset a forgotten password** — request a link by email, then set a new password. Links are single-use and expire after an hour.
 - **Manage your account** — change your display name, change (or set) your password, resend the verification email, and see your role, join date, and order count.
@@ -62,6 +63,9 @@ Scheduled jobs (called "cron jobs") run in the background to:
 | **[Vercel](https://vercel.com)**                                                          | A hosting platform                                  | Running the deployed app and triggering the scheduled background jobs                                                              |
 | **[Vitest](https://vitest.dev)**                                                          | A unit-test runner                                  | Testing pure logic — pagination math, date bucketing, email escaping, auth guards                                                  |
 | **[Playwright](https://playwright.dev)**                                                  | A browser-automation test tool                      | End-to-end tests that drive a real browser against a real build                                                                    |
+| **[hls.js](https://github.com/video-dev/hls.js)**                                         | A streaming-video player                            | Playing game trailers, which Steam serves only as adaptive HLS/DASH streams rather than plain MP4 files                            |
+| **[sanitize-html](https://github.com/apostrophecms/sanitize-html)**                       | An HTML sanitiser                                   | Stripping anything dangerous out of imported store descriptions before they are rendered                                           |
+| **[Steam Web API](https://store.steampowered.com/api/appdetails)**                        | Valve's public store API                            | Importing the catalogue: genres, feature tags, prices, screenshots, trailers, and review scores                                    |
 
 ---
 
@@ -131,12 +135,25 @@ applies everything in `prisma/migrations/` normally.
 npm run db:seed
 ```
 
-This creates the categories and the game catalogue. If you also set `SEED_ADMIN_EMAIL` and
+This creates the categories and a starter game catalogue. If you also set `SEED_ADMIN_EMAIL` and
 `SEED_ADMIN_PASSWORD` in your `.env`, it creates an admin account so you can open `/admin` —
 otherwise it skips that step and tells you so. There is deliberately **no default admin password**:
 a hardcoded credential in a public repo becomes a real vulnerability the moment someone deploys it.
 
-**5. Start the app**
+**5. Import the full catalogue (optional but recommended)**
+
+```bash
+npm run import:steam
+```
+
+This pulls ~120 real games from Steam's public store API — genres, feature tags, list prices,
+Metacritic scores, screenshots and trailers. It takes a few minutes: the endpoint is rate limited, so
+requests are spaced out and cached to `.steam-cache/` (gitignored) for re-runs.
+
+It is safe to run repeatedly. It matches games on their Steam app id, so a second run updates rather
+than duplicates, and it never deletes a game that a customer already owns.
+
+**6. Start the app**
 
 ```bash
 npm run dev
@@ -157,7 +174,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser — you shou
 | `npm run typecheck`     | `tsc --noEmit`                                                                  |
 | `npm run lint`          | ESLint                                                                          |
 | `npm run format`        | Prettier                                                                        |
-| `npm run db:seed`       | Fill a database with categories, the catalogue, and (optionally) an admin       |
+| `npm run db:seed`       | Fill a database with categories, a starter catalogue, and (optionally) an admin |
+| `npm run import:steam`  | Import ~120 games from Steam: genres, features, screenshots, trailers, prices   |
 | `npm run verify:images` | Check that every game's cover art still resolves                                |
 
 **Unit tests mock Prisma rather than hitting a database.** The only database this project has is a
@@ -201,6 +219,7 @@ src/
 ├── actions/        # Server Actions — functions the frontend calls to change data
 ├── components/     # Reusable UI pieces (buttons, cards, navbar, etc.)
 ├── data/           # Data-access layer — the ONLY place that talks to the database
+├── hooks/          # Shared client hooks (list query params, debounced search)
 ├── lib/            # Shared helpers (email templates, pagination, date series)
 ├── services/       # Business logic (e.g., what happens during checkout)
 ├── test/           # Test doubles (the Prisma mock, the server-only stub)
@@ -209,6 +228,7 @@ prisma/
 ├── schema.prisma   # The database blueprint: every table and its columns
 ├── seed.ts         # Fills a fresh database with categories, games, and an admin
 └── migrations/     # SQL files that build the database step by step
+scripts/            # One-off maintenance: Steam import, cover-art verification
 e2e/                # Playwright end-to-end specs
 ```
 
@@ -228,6 +248,19 @@ A few design decisions worth knowing about:
 - **`callbackUrl` is validated before use.** Pages like `/library` and `/account` redirect to `/login?callbackUrl=…`, which the sign-in form previously ignored entirely (it always went to `/`). Honouring it naively is an open redirect: `//evil.com` is a protocol-relative URL that passes a `startsWith("/")` check and navigates off-site, which is what makes a phishing link look legitimate. It's now reduced to a same-origin path first.
 - **Pagination orders by a unique tiebreaker.** Sorting by price alone means rows with equal prices have no defined order, so OFFSET paging can show the same game twice or skip one entirely. Every catalogue query ends with `{ id: "asc" }`. The `count()` also always uses the exact same `where` as the `findMany()`.
 
+### What the Steam importer had to work around
+
+`scripts/import-steam-games.ts` is more defensive than it looks, and every guard in it exists because
+the obvious version produced wrong data:
+
+- **The API geolocates by IP.** Without `cc=us&l=english`, the same request returns genre names in the caller's language and prices in whatever currency it guesses — a catalogue with Turkish tags and prices mixed across USD, CAD and GBP. It also changed one game from "no trailers" to two.
+- **Steam's `type` field can't be trusted.** OBS Studio, Wallpaper Engine, Crosshair X and Soundpad all report `type: "game"` and all appear in the most-played chart. They're identified by their genres instead, which come from Steam's software id range, and the software genres they drag in are cleaned up afterwards.
+- **Two category ids can share one name** — 55 and 56 are both "DualShock Controller Support" — so a feature's identity is its slug, not the upstream id. Keying on the id produced duplicate tags on the same game.
+- **Prices use `initial`, not `final`.** `final` includes whatever sale is running right now, which would freeze a temporary discount into the catalogue permanently.
+- **Cover URLs are verified, not assumed.** The API doesn't return the portrait "library capsule", so it has to be constructed — but newer titles use hashed asset paths and some publish no portrait art at all. Each candidate is checked with a `HEAD` request before being stored, falling back to the landscape header image, which the API does return. Cards letterbox those over a blurred copy of themselves so the artwork isn't sliced in half.
+- **Imported descriptions are sanitised at write time**, once, with a tag allowlist and images restricted to Steam's own CDNs — rather than trusting the markup on every render.
+- **Trailers need a streaming player.** Steam serves DASH and HLS only; there is no progressive MP4 anywhere in the response. `hls.js` is loaded lazily on first play, and `Hls.isSupported()` is checked **before** native playback: Chrome answers `canPlayType("application/vnd.apple.mpegurl")` with a truthy `"maybe"` despite being unable to play HLS, so testing native support first leaves the video stuck forever.
+
 ---
 
 ## ⚠️ Known limitations
@@ -239,8 +272,11 @@ This is a portfolio project, so a few things are intentionally simplified:
 - **Role changes take up to 5 minutes.** That re-read interval is a deliberate trade-off against a database lookup on every authenticated request. The admin UI says so rather than pretending the change is instant; signing out and back in applies it immediately.
 - **No IP-level rate limiting.** Password reset requests are throttled per account in the database (3 per 15 minutes), which is correct across serverless instances. Limiting by IP belongs at the edge — Vercel WAF or Upstash — and is out of scope here. An in-memory limiter would be per-instance on serverless, i.e. no limit at all.
 - **Email verification isn't enforced at login.** It's advisory: unverified accounts can still sign in.
-- **Search isn't index-accelerated.** There are btree indexes on `title`, `price`, and `releaseDate`, but those only support the `ORDER BY` of each sort option. The search itself compiles to `ILIKE '%query%'`, and a leading wildcard can't use a btree — so it's a sequential scan. At real catalogue scale the fix is a `pg_trgm` GIN index (`CREATE INDEX ... USING gin (title gin_trgm_ops)`) or a full-text `tsvector` column with a trigger. Neither is implemented here: Prisma has no first-class support for either, and the catalogue is ~40 rows. Adding a GIN index at this size would be cargo cult.
-- **Cover art is hotlinked, not hosted.** The seeded catalogue uses real games, with covers pulled from Steam's public CDN by app id. Those images are publisher-owned and served from infrastructure this project doesn't control, so they can change or stop resolving — `npm run verify:images` checks all of them in one command. A production store would license its artwork and serve it from its own CDN.
+- **Search isn't index-accelerated.** There are btree indexes on `title`, `price`, and `releaseDate`, but those only support the `ORDER BY` of each sort option. The search itself compiles to `ILIKE '%query%'`, and a leading wildcard can't use a btree — so it's a sequential scan. At real catalogue scale the fix is a `pg_trgm` GIN index (`CREATE INDEX ... USING gin (title gin_trgm_ops)`) or a full-text `tsvector` column with a trigger. Neither is implemented here: Prisma has no first-class support for either, and the catalogue is ~120 rows. Adding a GIN index at this size would be cargo cult.
+- **All media is hotlinked, not hosted.** Cover art, screenshots and trailers are served from Steam's CDN. They're publisher-owned and live on infrastructure this project doesn't control, so they can change or stop resolving — `npm run verify:images` checks every cover in one command. A production store would license its media and serve it itself.
+- **Eight games have no portrait cover.** Steam publishes none for them, so they fall back to the landscape store header, letterboxed in the card. That's an upstream gap rather than something to fix in code.
+- **Imported data is a snapshot.** Prices, review counts and Metacritic scores are captured at import time and don't track Steam afterwards. Re-running `npm run import:steam` refreshes them.
+- **The catalogue is capped at ~120 games.** App ids come from Steam's most-played chart plus a curated list, and the endpoint is rate limited to roughly 200 requests per 5 minutes. Going much larger means batching the import across a longer window.
 - **No mobile navigation.** The navbar has no hamburger menu, so the search box is hidden below the `sm` breakpoint (the `/games` page renders its own for small screens). A proper mobile nav is the next UI job.
 - **Simple pagination** — admin lists show 20 items per page, the storefront 24. Offset-based, which is fine at this scale; keyset pagination would be the move at much larger volumes.
 
