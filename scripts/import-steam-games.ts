@@ -70,6 +70,7 @@ type SteamApp = {
   short_description?: string;
   about_the_game?: string;
   header_image?: string;
+  capsule_image?: string;
   website?: string | null;
   developers?: string[];
   publishers?: string[];
@@ -189,6 +190,42 @@ function parseReleaseDate(app: SteamApp): Date | null {
   return null;
 }
 
+/**
+ * Works out a cover image that actually exists.
+ *
+ * appdetails does not return the portrait "library capsule", so the only way to
+ * get one is to construct the URL - and constructing it blindly is what put ten
+ * 404s in the catalogue. Newer titles use a hashed asset path, and some publish
+ * no portrait art at all, so each candidate is checked before being stored and
+ * the landscape header (which the API does return, and which always exists) is
+ * the last resort.
+ */
+async function resolveCoverUrl(app: SteamApp): Promise<string | null> {
+  const candidates = [
+    `https://cdn.cloudflare.steamstatic.com/steam/apps/${app.steam_appid}/library_600x900.jpg`,
+  ];
+
+  // Newer apps serve assets under a content hash; the portrait capsule, when it
+  // exists, sits beside the small capsule the API does give us.
+  if (app.capsule_image?.includes("capsule_231x87.jpg")) {
+    candidates.push(
+      app.capsule_image.replace("capsule_231x87.jpg", "library_600x900.jpg")
+    );
+  }
+
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url, { method: "HEAD" });
+      if (response.ok) return url;
+    } catch {
+      // Network hiccup on a candidate is not fatal; fall through to the next.
+    }
+  }
+
+  // Landscape, so it crops in a portrait card - but real art beats "No image".
+  return app.header_image ?? null;
+}
+
 function priceFor(app: SteamApp): number | null {
   if (app.is_free) return 0;
   // `initial` is the list price. `final` includes whatever sale is running
@@ -286,7 +323,7 @@ async function importApp(app: SteamApp) {
     aboutHtml: app.about_the_game ? sanitizeAbout(app.about_the_game) : null,
     price,
     releaseDate,
-    imageUrl: `https://cdn.cloudflare.steamstatic.com/steam/apps/${app.steam_appid}/library_600x900.jpg`,
+    imageUrl: await resolveCoverUrl(app),
     headerImage: app.header_image ?? null,
     developer: app.developers?.[0] ?? null,
     publisher: app.publishers?.[0] ?? null,

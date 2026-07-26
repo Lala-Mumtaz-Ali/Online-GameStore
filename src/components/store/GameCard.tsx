@@ -9,19 +9,38 @@ type GameCardProps = {
 };
 
 export function GameCard({ slug, title, price, imageUrl, owned = false }: GameCardProps) {
+  // Not every game publishes portrait cover art, so the importer falls back to
+  // the landscape store header. Cropping that to a 3:4 card slices the title
+  // off, so it is letterboxed over a blurred copy of itself instead - the whole
+  // image stays visible and the card still fills its box.
+  const isLandscape = imageUrl?.includes("header.jpg") ?? false;
+
   return (
     <Link
       href={`/games/${slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/50"
     >
-      <div className="aspect-[3/4] w-full overflow-hidden bg-muted">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          />
+          <>
+            {isLandscape && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-xl"
+              />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt={title}
+              className={`relative h-full w-full transition-transform group-hover:scale-105 ${
+                isLandscape ? "object-contain" : "object-cover"
+              }`}
+            />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
             No image
